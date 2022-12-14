@@ -9,23 +9,23 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-// func (h *Handler) Register(c *gin.Context) {
-// 	var reqBody entity.UserRegisterReqBody
+func (h *Handler) Register(c *gin.Context) {
+	var reqBody entity.UserRegisterReqBody
 
-// 	if err := c.BindJSON(&reqBody); err != nil {
-// 		router_helper.GenerateErrorMessage(c, errorlist.BadRequestError("something wrong with the request content", "INPUT_INCOMPLETE"))
-// 		return
-// 	}
+	if err := c.BindJSON(&reqBody); err != nil {
+		router_helper.GenerateErrorMessage(c, errorlist.BadRequestError("something wrong with the request content", "INPUT_INCOMPLETE"))
+		return
+	}
 
-// 	u, err := h.userUsecase.Register(reqBody.Name, reqBody.Email, reqBody.Password)
+	u, err := h.userUsecase.Register(&reqBody)
 
-// 	if err != nil {
-// 		router_helper.GenerateErrorMessage(c, err)
-// 		return
-// 	}
+	if err != nil {
+		router_helper.GenerateErrorMessage(c, err)
+		return
+	}
 
-// 	router_helper.GenerateResponseMessage(c, u)
-// }
+	router_helper.GenerateResponseMessage(c, u)
+}
 
 func (h *Handler) Login(c *gin.Context) {
 	var reqBody entity.UserLoginReqBody

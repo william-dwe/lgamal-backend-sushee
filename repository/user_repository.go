@@ -4,10 +4,14 @@ import (
 	"final-project-backend/entity"
 
 	"gorm.io/gorm"
+	"gorm.io/gorm/clause"
 )
 
 type UserRepository interface {
 	GetUserByEmailOrUsername(string) (*entity.User, error)
+	CheckEmailExistence(string) (int, error)
+	CheckUsernameExistence(string) (int, error)
+	AddNewUser(*entity.User) (*entity.User, error)
 }
 
 type UserRepositoryImpl struct {
@@ -30,16 +34,22 @@ func (r *UserRepositoryImpl) GetUserByEmailOrUsername(i string) (*entity.User, e
 	return &user, err
 }
 
-// func (r *UserRepositoryImpl) CheckEmailExistence(e string) (int, error) {
-// 	var user entity.User
-// 	tx := r.db.Clauses(clause.OnConflict{DoNothing: true}).Where("email = ?", e).First(&user)
-// 	return int(tx.RowsAffected), tx.Error
-// }
+func (r *UserRepositoryImpl) CheckEmailExistence(i string) (int, error) {
+	var user entity.User
+	tx := r.db.Clauses(clause.OnConflict{DoNothing: true}).Where("email = ?", i).First(&user)
+	return int(tx.RowsAffected), tx.Error
+}
 
-// func (r *UserRepositoryImpl) AddNewUser(u *entity.User) (*entity.User, error) {
-// 	err := r.db.Create(&u).Error
-// 	return u, err
-// }
+func (r *UserRepositoryImpl) CheckUsernameExistence(i string) (int, error) {
+	var user entity.User
+	tx := r.db.Clauses(clause.OnConflict{DoNothing: true}).Where("email = ?", i).Or("username = ?", i).First(&user)
+	return int(tx.RowsAffected), tx.Error
+}
+
+func (r *UserRepositoryImpl) AddNewUser(u *entity.User) (*entity.User, error) {
+	err := r.db.Create(&u).Error
+	return u, err
+}
 
 // func (r *UserRepositoryImpl) GetUserByEmail(email string) (*entity.User, error) {
 // 	var user entity.User

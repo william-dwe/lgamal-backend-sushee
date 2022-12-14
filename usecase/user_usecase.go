@@ -4,6 +4,7 @@ import (
 	"errors"
 	"final-project-backend/errorlist"
 	"final-project-backend/utils"
+	"time"
 
 	"final-project-backend/entity"
 	"final-project-backend/repository"
@@ -12,7 +13,7 @@ import (
 )
 
 type UserUsecase interface {
-	// Register(string, string, string) (*entity.UserRegisterResBody, error)
+	Register(*entity.UserRegisterReqBody) (*entity.UserRegisterResBody, error)
 	Login(string, string) (*entity.UserLoginResBody, error)
 	// GetDetailUser(int) (*entity.User, error)
 }
@@ -31,49 +32,62 @@ func NewUserUsecase(c UserUsecaseConfig) UserUsecase {
 	}
 }
 
-// func (u *userUsecaseImpl) Register(name, email, pass string) (*entity.UserRegisterResBody, error) {
-// 	nRow, err := u.userRepository.CheckEmailExistence(email)
-// 	if nRow > 0 {
-// 		return nil, errorlist.BadRequestError("email already registered", "EMAIL_EXISTED")
-// 	}
-// 	if err != nil && !errors.Is(err, gorm.ErrRecordNotFound) {
-// 		return nil, errorlist.InternalServerError()
-// 	}
+func (u *userUsecaseImpl) Register(reqBody *entity.UserRegisterReqBody) (*entity.UserRegisterResBody, error) {
+	var nRow int
+	var err error
+	nRow, err = u.userRepository.CheckEmailExistence(reqBody.Email)
+	if nRow > 0 {
+		return nil, errorlist.BadRequestError("email already registered", "EMAIL_EXISTED")
+	}
+	if err != nil && !errors.Is(err, gorm.ErrRecordNotFound) {
+		return nil, errorlist.InternalServerError()
+	}
 
-// 	hashedPass, _ := utils.HashAndSalt(pass)
-// 	validReqNewUser := entity.User{
-// 		Name:     name,
-// 		Email:    email,
-// 		Password: hashedPass,
-// 	}
+	nRow, err = u.userRepository.CheckUsernameExistence(reqBody.Username)
+	if nRow > 0 {
+		return nil, errorlist.BadRequestError("username already registered", "USERNAME_EXISTED")
+	}
+	if err != nil && !errors.Is(err, gorm.ErrRecordNotFound) {
+		return nil, errorlist.InternalServerError()
+	}
 
-// 	newUser, err := u.userRepository.AddNewUser(&validReqNewUser)
-// 	if err != nil {
-// 		return nil, errorlist.InternalServerError()
-// 	}
+	initialProfilePicture := ""
+	initialPlayAttempt := 0
+	defaultRoleId := 1
+	hashedPass, _ := utils.HashAndSalt(reqBody.Email)
+	validReqNewUser := entity.User{
+		FullName:     reqBody.FullName,
+		Phone: reqBody.Phone,
+		Email:    reqBody.Email,
+		Username: reqBody.Username,
+		Password: hashedPass,
+		RegisterDate: time.Now(),
+		ProfilePicture: initialProfilePicture,
+		PlayAttempt: initialPlayAttempt,
+		RoleId: defaultRoleId,
+		
+	}
 
-// 	validResNewUser := entity.UserRegisterResBody{
-// 		Id:    newUser.Id,
-// 		Name:  newUser.Name,
-// 		Email: newUser.Email,
-// 	}
+	newUser, err := u.userRepository.AddNewUser(&validReqNewUser)
+	if err != nil {
+		return nil, errorlist.InternalServerError()
+	}
 
-// 	var default_balance = float64(0)
-// 	newWallet := entity.Wallet{
-// 		UserId:  validResNewUser.Id,
-// 		Balance: default_balance,
-// 	}
+	validResNewUser := entity.UserRegisterResBody{
+		FullName:     newUser.FullName,
+		Phone: newUser.Phone,
+		Email:    newUser.Email,
+		Username: newUser.Username,
+		RegisterDate: newUser.RegisterDate,
+	}
 
-// 	_, err = u.walletRepository.AddNewWallet(&newWallet)
-// 	if err != nil {
-// 		return nil, errorlist.InternalServerError()
-// 	}
-
-// 	return &validResNewUser, nil
-// }
+	return &validResNewUser, nil
+}
 
 func (u *userUsecaseImpl) Login(identifier, password string) (*entity.UserLoginResBody, error) {
-	user, err := u.userRepository.GetUserByEmailOrUsername(identifier)
+	var user *entity.User
+	var err error
+	user, err = u.userRepository.GetUserByEmailOrUsername(identifier)
 	if errors.Is(err, gorm.ErrRecordNotFound){
 		return nil, errorlist.UnauthorizedError()
 	}

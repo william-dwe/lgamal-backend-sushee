@@ -20,11 +20,11 @@ func CreateRouter(c RouterConfig) *gin.Engine {
 	})
 
 	r.Use(middleware.JSONifyResult())
-	// r.POST("/register", h.Register)
 	r.POST("/login", h.Login)
+	r.POST("/register", h.Register)
 
 	r.Use(middleware.Authorize)
-	
 	r.NoRoute(h.NotFoundHandler)
+
 	return r
 }

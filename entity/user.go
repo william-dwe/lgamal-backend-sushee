@@ -27,3 +27,23 @@ type UserLoginReqBody struct {
 type UserLoginResBody struct {
 	AccessToken string `json:"access_token"`
 }
+
+type UserRegisterReqBody struct {
+	FullName  string `json:"full_name" binding:"required"`
+	Phone string `gorm:"unique"`
+	Email     string `gorm:"unique" binding:"required"`
+	Username string `gorm:"unique" binding:"required"`
+	Password  string `binding:"required"`
+}
+
+type UserRegisterResBody struct {
+	FullName  string
+	Phone string
+	Email     string
+	Username string
+	Password  string 
+	RegisterDate time.Time
+	ProfilePicture string
+	PlayAttempt int
+	RoleId int
+}

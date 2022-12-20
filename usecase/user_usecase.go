@@ -4,8 +4,10 @@ import (
 	"errors"
 	"final-project-backend/errorlist"
 	"final-project-backend/utils"
+	"strconv"
 	"time"
 
+	"final-project-backend/config"
 	"final-project-backend/entity"
 	"final-project-backend/repository"
 
@@ -14,7 +16,8 @@ import (
 
 type UserUsecase interface {
 	Register(*entity.UserRegisterReqBody) (*entity.UserRegisterResBody, error)
-	Login(string, string) (*entity.UserLoginResBody, error)
+	Login(string, string) (*entity.UserLoginResBody, string, error)
+	Refresh(string) (*entity.UserLoginResBody, error)
 	// GetDetailUser(int) (*entity.User, error)
 }
 
@@ -84,27 +87,75 @@ func (u *userUsecaseImpl) Register(reqBody *entity.UserRegisterReqBody) (*entity
 	return &validResNewUser, nil
 }
 
-func (u *userUsecaseImpl) Login(identifier, password string) (*entity.UserLoginResBody, error) {
+func (u *userUsecaseImpl) Login(identifier, password string) (*entity.UserLoginResBody, string, error) {
 	var user *entity.User
 	var err error
 	user, err = u.userRepository.GetUserByEmailOrUsername(identifier)
 	if errors.Is(err, gorm.ErrRecordNotFound){
-		return nil, errorlist.UnauthorizedError()
+		return nil, "", errorlist.UnauthorizedError()
 	}
 
 	if err != nil {
-		return nil, err
+		return nil, "", err
 	}
 
 	a := utils.NewAuthUtil()
 	if !a.ComparePassword(user.Password, password) {
+		return nil, "", errorlist.UnauthorizedError()
+	}
+	accessTokenStr, err := a.GenerateAccessToken(user)
+	if err != nil {
+		return nil, "", err
+	}
+	refreshTokenStr, err := a.GenerateRefreshToken()
+	if err != nil {
+		return nil, "", err
+	}
+
+	expirationLimit, _ := strconv.ParseInt(config.Config.AuthConfig.TimeLimitRefreshToken, 10, 64)
+	session := entity.Session{
+		RefreshToken: refreshTokenStr,
+		UserId: int(user.ID),
+		ExpiredAt: time.Now().Add(time.Second * time.Duration(expirationLimit)),
+	}
+	u.userRepository.AddNewUserSession(&session)
+
+	token := entity.UserLoginResBody{
+		AccessToken: accessTokenStr,
+	}
+	return &token, refreshTokenStr, err
+}
+
+
+func (u *userUsecaseImpl) Refresh(refreshToken string) (*entity.UserLoginResBody, error) {
+	var err error
+	a := utils.NewAuthUtil()
+	_, err = a.ValidateToken(refreshToken, config.Config.AuthConfig.HmacSecretRefreshToken)
+	if err != nil {
+		return nil, err
+	}
+
+	session, err := u.userRepository.GetUserSessionByRefreshToken(refreshToken)
+	if err != nil {
+		return nil, err
+	}
+	if time.Now().After(session.ExpiredAt) {
 		return nil, errorlist.UnauthorizedError()
 	}
-	tokenStr, err := a.GenerateAccessToken(user)
-	token := entity.UserLoginResBody{
-		AccessToken: tokenStr,
+
+	user, err := u.userRepository.GetUserById(session.UserId)
+	if err != nil {
+		return nil, err
 	}
-	return &token, err
+
+	accessTokenStr, err := a.GenerateAccessToken(user)
+	if err != nil {
+		return nil, err
+	}
+	accessToken := entity.UserLoginResBody{
+		AccessToken: accessTokenStr,
+	}
+	return &accessToken, err
 }
 
 // func (u *userUsecaseImpl) GetDetailUser(id int) (*entity.User, error) {

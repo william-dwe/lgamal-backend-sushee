@@ -25,7 +25,7 @@ type UserLoginReqBody struct {
 }
 
 type UserLoginResBody struct {
-	AccessToken string `json:"access_token"`
+	AccessToken string `json:"accessToken"`
 }
 
 type UserRegisterReqBody struct {

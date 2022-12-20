@@ -31,6 +31,16 @@ CREATE TABLE IF NOT EXISTS users (
 	deleted_at TIMESTAMP NULL
 );
 
+CREATE TABLE IF NOT EXISTS session (
+	id SERIAL PRIMARY KEY,
+	refresh_token VARCHAR,
+	user_id INT,
+	foreign key (user_id) references users(id),
+	expired_at TIMESTAMP,
+	created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+	updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+	deleted_at TIMESTAMP NULL
+);
 
 -- CREATE SEQUENCE wallet_id_sequence
 --   INCREMENT 1
@@ -40,7 +50,7 @@ CREATE TABLE IF NOT EXISTS users (
 --   CACHE 1;
 
 -- CREATE TABLE IF NOT EXISTS wallets(
--- 	id INTEGER PRIMARY KEY DEFAULT NEXTVAL('wallet_id_sequence'),
+-- 	id INTEGER PRIMARY KEY DEFAULT NEXTVAL('666666666wallet_id_sequence'),
 -- 	user_id INT,
 -- 	FOREIGN KEY (user_id) REFERENCES users(id),
 -- 	balance NUMERIC,

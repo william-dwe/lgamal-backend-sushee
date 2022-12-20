@@ -1,7 +1,9 @@
 package handler
 
 import (
+	"final-project-backend/config"
 	"final-project-backend/errorlist"
+	"strconv"
 
 	"final-project-backend/entity"
 	"final-project-backend/handler/router_helper"
@@ -34,12 +36,40 @@ func (h *Handler) Login(c *gin.Context) {
 		return
 	}
 
-	token, err := h.userUsecase.Login(reqBody.Identifier, reqBody.Password)
+	AccessToken, refreshToken, err := h.userUsecase.Login(reqBody.Identifier, reqBody.Password)
 	if err != nil {
 		router_helper.GenerateErrorMessage(c, err)
 		return
 	}
-	router_helper.GenerateResponseMessage(c, token)
+
+	expirationLimit, _ := strconv.Atoi(config.Config.AuthConfig.TimeLimitRefreshToken)
+	c.SetCookie(
+		"refreshToken",
+		refreshToken,
+		expirationLimit,
+		"/",
+		"localhost",
+		false,
+		true,
+	)
+
+	router_helper.GenerateResponseMessage(c, AccessToken)
+}
+
+
+func (h *Handler) Refresh(c *gin.Context) {
+	refreshToken, err := c.Cookie("refreshToken")
+	if err != nil {
+		router_helper.GenerateErrorMessage(c, err)
+		return
+	}
+
+	accessToken, err := h.userUsecase.Refresh(refreshToken)
+	if err != nil {
+		router_helper.GenerateErrorMessage(c, err)
+		return
+	}
+	router_helper.GenerateResponseMessage(c, accessToken)
 }
 
 // func (h *Handler) ShowUserDetail(c *gin.Context) {

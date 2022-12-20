@@ -8,10 +8,13 @@ import (
 )
 
 type UserRepository interface {
+	GetUserById(i int) (*entity.User, error)
 	GetUserByEmailOrUsername(string) (*entity.User, error)
 	CheckEmailExistence(string) (int, error)
 	CheckUsernameExistence(string) (int, error)
 	AddNewUser(*entity.User) (*entity.User, error)
+	AddNewUserSession(s *entity.Session) (*entity.Session, error)
+	GetUserSessionByRefreshToken(t string) (*entity.Session, error) 
 }
 
 type UserRepositoryImpl struct {
@@ -26,6 +29,12 @@ func NewUserRepository(c UserRepositoryConfig) UserRepository {
 	return &UserRepositoryImpl{
 		db: c.DB,
 	}
+}
+
+func (r *UserRepositoryImpl) GetUserById(i int) (*entity.User, error) {
+	var user entity.User
+	err := r.db.Where("id = ?", i).First(&user).Error
+	return &user, err
 }
 
 func (r *UserRepositoryImpl) GetUserByEmailOrUsername(i string) (*entity.User, error) {
@@ -50,6 +59,17 @@ func (r *UserRepositoryImpl) AddNewUser(u *entity.User) (*entity.User, error) {
 	err := r.db.Create(&u).Error
 	return u, err
 }
+
+func (r *UserRepositoryImpl) AddNewUserSession(s *entity.Session) (*entity.Session, error) {
+	err := r.db.Create(&s).Error
+	return s, err
+}
+
+func (r *UserRepositoryImpl) GetUserSessionByRefreshToken(t string) (*entity.Session, error) {
+	var session entity.Session
+	err := r.db.Where("refresh_token = ?", t).First(&session).Error
+	return &session, err
+} 
 
 // func (r *UserRepositoryImpl) GetUserByEmail(email string) (*entity.User, error) {
 // 	var user entity.User

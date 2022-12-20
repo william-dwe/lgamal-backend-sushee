@@ -16,8 +16,10 @@ type dbConfig struct {
 }
 
 type authConfig struct {
-	ExpiresAt  string
-	HmacSecret string
+	TimeLimitAccessToken  string
+	TimeLimitRefreshToken  string
+	HmacSecretAccessToken string
+	HmacSecretRefreshToken string
 	IsTesting  string
 }
 type AppConfig struct {
@@ -38,12 +40,14 @@ func initConfig() AppConfig {
 			Host:     getENV("DB_HOST", "localhost"),
 			User:     getENV("DB_USER", "postgres"),
 			Password: getENV("DB_PASSWORD", "postgres"),
-			DBName:   getENV("DB_NAME", "wallet_db_william"),
+			DBName:   getENV("DB_NAME", "db_restaurant"),
 			Port:     getENV("DB_PORT", "5432"),
 		},
 		AuthConfig: authConfig{
-			ExpiresAt:  getENV("AUTH_EXPIRATION", "900"),
-			HmacSecret: getENV("HMAC_SECRET", "very-secret"),
+			TimeLimitAccessToken:  getENV("ACCESS_TOKEN_EXPIRATION", "900"),
+			TimeLimitRefreshToken:  getENV("REFRESH_TOKEN_EXPIRATION", "86400"),
+			HmacSecretAccessToken: getENV("HMAC_SECRET_ACCESS_TOKEN", "very-secret"),
+			HmacSecretRefreshToken: getENV("HMAC_SECRET_REFRESH_TOKEN", "super-secret"),
 			IsTesting:  getENV("IS_TESTING", "true"),
 		},
 	}

@@ -2,29 +2,22 @@ package middleware
 
 import (
 	"encoding/json"
-	"errors"
 	"fmt"
 	"net/http"
 	"strings"
 
 	"final-project-backend/config"
 	"final-project-backend/entity"
+	"final-project-backend/utils"
 
 	"github.com/gin-gonic/gin"
 	"github.com/golang-jwt/jwt/v4"
 )
 
-func validateToken(encodedToken string) (*jwt.Token, error) {
-	return jwt.Parse(encodedToken, func(t *jwt.Token) (interface{}, error) {
-		if _, isValid := t.Method.(*jwt.SigningMethodHMAC); !isValid {
-			return nil, errors.New("invalid signature token")
-		}
-		return []byte("very-secret"), nil
-	})
-}
 
 func Authorize(c *gin.Context) {
-	if config.Config.AuthConfig.IsTesting != "false" {
+	conf := config.Config.AuthConfig
+	if conf.IsTesting != "false" {
 		fmt.Println("disabled JWT auth for testing")
 		return
 	}
@@ -36,7 +29,8 @@ func Authorize(c *gin.Context) {
 	}
 	decodedtoken := s[1]
 
-	token, err := validateToken(decodedtoken)
+	a :=  utils.NewAuthUtil()
+	token, err := a.ValidateToken(decodedtoken, conf.HmacSecretAccessToken)
 	if err != nil || !token.Valid {
 		c.AbortWithStatus(http.StatusUnauthorized)
 		return

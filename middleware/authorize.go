@@ -3,49 +3,48 @@ package middleware
 import (
 	"encoding/json"
 	"fmt"
-	"net/http"
 	"strings"
 
 	"final-project-backend/config"
 	"final-project-backend/entity"
+	"final-project-backend/errorlist"
+	"final-project-backend/handler/router_helper"
 	"final-project-backend/utils"
 
 	"github.com/gin-gonic/gin"
 	"github.com/golang-jwt/jwt/v4"
 )
 
-
 func Authorize(c *gin.Context) {
 	conf := config.Config.AuthConfig
 	if conf.IsTesting != "false" {
-		fmt.Println("disabled JWT auth for testing")
 		return
 	}
 	authHeader := c.GetHeader("Authorization")
-	s := strings.Split(authHeader, "Bearer ")
-	if len(s) < 2 {
-		c.AbortWithStatus(http.StatusUnauthorized)
+	encodedTokenArray := strings.Split(authHeader, "Bearer ")
+	if len(encodedTokenArray) < 2 {
+		router_helper.GenerateErrorMessage(c, errorlist.UnauthorizedError())
 		return
 	}
-	decodedtoken := s[1]
-
+	encodedToken := encodedTokenArray[1]
+	
 	a :=  utils.NewAuthUtil()
-	token, err := a.ValidateToken(decodedtoken, conf.HmacSecretAccessToken)
+	token, err := a.ValidateToken(encodedToken, conf.HmacSecretAccessToken)
 	if err != nil || !token.Valid {
-		c.AbortWithStatus(http.StatusUnauthorized)
+		router_helper.GenerateErrorMessage(c, errorlist.UnauthorizedError())
 		return
 	}
 
 	claims, ok := token.Claims.(jwt.MapClaims)
 	if !ok {
-		c.AbortWithStatus(http.StatusUnauthorized)
+		router_helper.GenerateErrorMessage(c, errorlist.UnauthorizedError())
 		return
 	}
 
 	var userJson, _ = json.Marshal(claims["user"])
 	var user entity.UserLoginReqBody
 	if err := json.Unmarshal(userJson, &user); err != nil {
-		c.AbortWithStatus(http.StatusUnauthorized)
+		router_helper.GenerateErrorMessage(c, errorlist.UnauthorizedError())
 		return
 	}
 

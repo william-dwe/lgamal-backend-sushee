@@ -2,6 +2,7 @@ package repository
 
 import (
 	"final-project-backend/entity"
+	"fmt"
 
 	"gorm.io/gorm"
 	"gorm.io/gorm/clause"
@@ -12,9 +13,11 @@ type UserRepository interface {
 	GetUserByEmailOrUsername(string) (*entity.User, error)
 	CheckEmailExistence(string) (int, error)
 	CheckUsernameExistence(string) (int, error)
+	CheckPhoneExistence(i string) (int, error)
 	AddNewUser(*entity.User) (*entity.User, error)
 	AddNewUserSession(s *entity.Session) (*entity.Session, error)
 	GetUserSessionByRefreshToken(t string) (*entity.Session, error) 
+	UpdateUserDetailsByUsername(username string, updatePremises *entity.User) error
 }
 
 type UserRepositoryImpl struct {
@@ -55,6 +58,12 @@ func (r *UserRepositoryImpl) CheckUsernameExistence(i string) (int, error) {
 	return int(tx.RowsAffected), tx.Error
 }
 
+func (r *UserRepositoryImpl) CheckPhoneExistence(i string) (int, error) {
+	var user entity.User
+	tx := r.db.Clauses(clause.OnConflict{DoNothing: true}).Where("phone = ?", i).First(&user)
+	return int(tx.RowsAffected), tx.Error
+}
+
 func (r *UserRepositoryImpl) AddNewUser(u *entity.User) (*entity.User, error) {
 	err := r.db.Create(&u).Error
 	return u, err
@@ -71,23 +80,14 @@ func (r *UserRepositoryImpl) GetUserSessionByRefreshToken(t string) (*entity.Ses
 	return &session, err
 } 
 
-// func (r *UserRepositoryImpl) GetUserByEmail(email string) (*entity.User, error) {
-// 	var user entity.User
-// 	err := r.db.Where("email = ?", email).First(&user).Error
-// 	return &user, err
-// }
-
-// func (r *UserRepositoryImpl) GetUserDetailById(id int) (*entity.User, error) {
-// 	var user entity.User
-// 	err := r.db.Model(&user).Preload("Wallet").Where("id = ?", id).First(&user).Error
-// 	return &user, err
-// }
-
-// func (r *UserRepositoryImpl) UpdateUserPassword(userId int, newPass string) error {
-// 	var user entity.User
-// 	err := r.db.Model(&user).
-// 		Where("id = ?", userId).
-// 		Update("password", newPass).
-// 		Error
-// 	return err
-// }
+func (r *UserRepositoryImpl) UpdateUserDetailsByUsername(username string, newUser *entity.User) error {
+	var user entity.User
+	fmt.Println("USERNAME", username)
+	fmt.Println("UPDATEPREMISE", newUser)
+	err := r.db.Model(&user).
+		Where("username = ?", username).
+		Updates(newUser).
+		Debug().Error
+	fmt.Println("ERR:",err)
+	return err
+}

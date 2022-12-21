@@ -9,12 +9,11 @@ import (
 	"golang.org/x/crypto/bcrypt"
 
 	"final-project-backend/config"
-	"final-project-backend/entity"
 )
 
 type AuthUtil interface {
 	GenerateRefreshToken() (string, error)
-	GenerateAccessToken(user *entity.User) (string, error)
+	GenerateAccessToken(username string) (string, error)
 	ValidateToken(encodedToken, signSecret string) (*jwt.Token, error)
 	ComparePassword(hashedPwd string, inputPwd string) bool
 }
@@ -27,14 +26,14 @@ func NewAuthUtil() AuthUtil {
 
 var c = config.Config.AuthConfig
 type customAccessTokenClaims struct {
-	User *entity.User `json:"user"`
+	Username string `json:"username"`
 	jwt.RegisteredClaims
 }
 
-func (a *authUtilImpl) GenerateAccessToken(user *entity.User) (string, error) {
+func (a *authUtilImpl) GenerateAccessToken(username string) (string, error) {
 	expirationLimit, _ := strconv.ParseInt(c.TimeLimitAccessToken, 10, 64)
 	claims := &customAccessTokenClaims{
-		user,
+		username,
 		jwt.RegisteredClaims{
 			ExpiresAt: jwt.NewNumericDate(time.Now().Add(time.Second * time.Duration(expirationLimit))),
 			IssuedAt:  jwt.NewNumericDate(time.Now()),
@@ -70,7 +69,7 @@ func (a *authUtilImpl) ValidateToken(encodedToken, signSecret string) (*jwt.Toke
 			return nil, errors.New("invalid signature token")
 		}
 		return []byte(signSecret), nil
-	})
+	})	
 }
 
 

@@ -18,7 +18,8 @@ type UserUsecase interface {
 	Register(*entity.UserRegisterReqBody) (*entity.UserRegisterResBody, error)
 	Login(string, string) (*entity.UserLoginResBody, string, error)
 	Refresh(string) (*entity.UserLoginResBody, error)
-	// GetDetailUser(int) (*entity.User, error)
+	GetDetailUserByUsername(accessToken string) (*entity.UserContext, error)
+	UpdateUserDetailsByUsername(username string, updatePremises entity.UserEditDetailsReqBody) (*entity.UserContext, error)
 }
 
 type userUsecaseImpl struct {
@@ -54,10 +55,18 @@ func (u *userUsecaseImpl) Register(reqBody *entity.UserRegisterReqBody) (*entity
 		return nil, errorlist.InternalServerError()
 	}
 
+	nRow, err = u.userRepository.CheckPhoneExistence(reqBody.Phone)
+	if nRow > 0 {
+		return nil, errorlist.BadRequestError("phone already registered", "PHONE_EXISTED")
+	}
+	if err != nil && !errors.Is(err, gorm.ErrRecordNotFound) {
+		return nil, errorlist.InternalServerError()
+	}
+
 	initialProfilePicture := ""
 	initialPlayAttempt := 0
 	defaultRoleId := 1
-	hashedPass, _ := utils.HashAndSalt(reqBody.Email)
+	hashedPass, _ := utils.HashAndSalt(reqBody.Password)
 	validReqNewUser := entity.User{
 		FullName:     reqBody.FullName,
 		Phone: reqBody.Phone,
@@ -94,7 +103,6 @@ func (u *userUsecaseImpl) Login(identifier, password string) (*entity.UserLoginR
 	if errors.Is(err, gorm.ErrRecordNotFound){
 		return nil, "", errorlist.UnauthorizedError()
 	}
-
 	if err != nil {
 		return nil, "", err
 	}
@@ -103,7 +111,8 @@ func (u *userUsecaseImpl) Login(identifier, password string) (*entity.UserLoginR
 	if !a.ComparePassword(user.Password, password) {
 		return nil, "", errorlist.UnauthorizedError()
 	}
-	accessTokenStr, err := a.GenerateAccessToken(user)
+
+	accessTokenStr, err := a.GenerateAccessToken(user.Username)
 	if err != nil {
 		return nil, "", err
 	}
@@ -148,7 +157,7 @@ func (u *userUsecaseImpl) Refresh(refreshToken string) (*entity.UserLoginResBody
 		return nil, err
 	}
 
-	accessTokenStr, err := a.GenerateAccessToken(user)
+	accessTokenStr, err := a.GenerateAccessToken(user.Username)
 	if err != nil {
 		return nil, err
 	}
@@ -158,11 +167,72 @@ func (u *userUsecaseImpl) Refresh(refreshToken string) (*entity.UserLoginResBody
 	return &accessToken, err
 }
 
-// func (u *userUsecaseImpl) GetDetailUser(id int) (*entity.User, error) {
-// 	user, err := u.userRepository.GetUserDetailById(id)
-// 	if err != nil {
-// 		return nil, errorlist.InternalServerError()
-// 	}
+func (u *userUsecaseImpl) GetDetailUserByUsername(username string) (*entity.UserContext, error) {
+	user, err := u.userRepository.GetUserByEmailOrUsername(username)
+	if err != nil {
+		return nil, errorlist.InternalServerError()
+	}
 
-// 	return user, nil
-// }
+	userContext := entity.UserContext{
+		Username: user.Username,
+		FullName: user.FullName,
+		Email: user.Email,
+		Phone: user.Phone,
+		ProfilePicture: user.ProfilePicture,
+		PlayAttempt: user.PlayAttempt,
+		RoleId: user.RoleId,
+	}
+
+	return &userContext, nil
+}
+
+
+func (u *userUsecaseImpl) UpdateUserDetailsByUsername(username string, reqBody entity.UserEditDetailsReqBody) (*entity.UserContext, error) {
+	var nRow int
+	var err error
+	nRow, err = u.userRepository.CheckEmailExistence(reqBody.Email)
+	if nRow > 0 {
+		return nil, errorlist.BadRequestError("email already registered", "EMAIL_EXISTED")
+	}
+	if err != nil && !errors.Is(err, gorm.ErrRecordNotFound) {
+		return nil, errorlist.InternalServerError()
+	}
+
+	nRow, err = u.userRepository.CheckPhoneExistence(reqBody.Phone)
+	if nRow > 0 {
+		return nil, errorlist.BadRequestError("phone already registered", "PHONE_EXISTED")
+	}
+	if err != nil && !errors.Is(err, gorm.ErrRecordNotFound) {
+		return nil, errorlist.InternalServerError()
+	}
+	
+	hashedPass, _ := utils.HashAndSalt(reqBody.Password)
+
+	newUser := entity.User{
+		FullName: reqBody.FullName,
+		Phone: reqBody.Phone,
+		Email: reqBody.Email,
+		Password: hashedPass,
+		ProfilePicture: reqBody.ProfilePicture,
+	}
+
+	err = u.userRepository.UpdateUserDetailsByUsername(username, &newUser)
+	if err != nil {
+		return nil, errorlist.InternalServerError()
+	}
+
+	user, err := u.userRepository.GetUserByEmailOrUsername(username)
+	if err != nil {
+		return nil, errorlist.InternalServerError()
+	}
+	userContext := entity.UserContext{
+		Username: user.Username,
+		FullName: user.FullName,
+		Email: user.Email,
+		Phone: user.Phone,
+		ProfilePicture: user.ProfilePicture,
+		PlayAttempt: user.PlayAttempt,
+		RoleId: user.RoleId,
+	}
+	return &userContext, err
+}

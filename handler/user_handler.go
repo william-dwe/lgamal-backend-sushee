@@ -3,12 +3,16 @@ package handler
 import (
 	"final-project-backend/config"
 	"final-project-backend/errorlist"
+	"fmt"
+	"net/http"
 	"strconv"
+	"strings"
 
 	"final-project-backend/entity"
 	"final-project-backend/handler/router_helper"
 
 	"github.com/gin-gonic/gin"
+	"github.com/golang-jwt/jwt"
 )
 
 func (h *Handler) Register(c *gin.Context) {
@@ -72,19 +76,66 @@ func (h *Handler) Refresh(c *gin.Context) {
 	router_helper.GenerateResponseMessage(c, accessToken)
 }
 
-// func (h *Handler) ShowUserDetail(c *gin.Context) {
-// 	user, ok := c.Get("user")
-// 	if !ok {
-// 		router_helper.GenerateErrorMessage(c, errorlist.UnauthorizedError())
-// 		return
-// 	}
-// 	userId := user.(entity.UserContext).Id
+func (h *Handler) UserDetail(c *gin.Context) {
+	authHeader := c.GetHeader("Authorization")
+	s := strings.Split(authHeader, "Bearer ")
+	if len(s) < 2 {
+		c.AbortWithStatus(http.StatusUnauthorized)
+		return
+	}
+	encodedToken := s[1]
+	
+	var username string
+	token, _, err := new(jwt.Parser).ParseUnverified(encodedToken, jwt.MapClaims{})
+	if err != nil {
+		fmt.Printf("Error %s", err)
+	}
 
-// 	userInfo, err := h.userUsecase.GetDetailUser(userId)
-// 	if err != nil {
-// 		router_helper.GenerateErrorMessage(c, err)
-// 		return
-// 	}
+	if claims, ok := token.Claims.(jwt.MapClaims); ok {
+		username= fmt.Sprint(claims["username"])
+	}
 
-// 	router_helper.GenerateResponseMessage(c, userInfo)
-// }
+	userInfo, err := h.userUsecase.GetDetailUserByUsername(username)
+	if err != nil {
+		router_helper.GenerateErrorMessage(c, err)
+		return
+	}
+
+	router_helper.GenerateResponseMessage(c, userInfo)
+}
+
+
+func (h *Handler) UpdateUser(c *gin.Context) {
+	authHeader := c.GetHeader("Authorization")
+	s := strings.Split(authHeader, "Bearer ")
+	if len(s) < 2 {
+		c.AbortWithStatus(http.StatusUnauthorized)
+		return
+	}
+	encodedToken := s[1]
+	
+	var username string
+	token, _, err := new(jwt.Parser).ParseUnverified(encodedToken, jwt.MapClaims{})
+	if err != nil {
+		fmt.Printf("Error %s", err)
+	}
+
+	if claims, ok := token.Claims.(jwt.MapClaims); ok {
+		username= fmt.Sprint(claims["username"])
+	}
+
+
+	var reqBody entity.UserEditDetailsReqBody
+	if err := c.BindJSON(&reqBody); err != nil {
+		router_helper.GenerateErrorMessage(c, errorlist.BadRequestError("should provide the changes", "UPDATE_INPUT_INCOMPLETE"))
+		return
+	}
+
+	userInfo, err := h.userUsecase.UpdateUserDetailsByUsername(username, reqBody)
+	if err != nil {
+		router_helper.GenerateErrorMessage(c, err)
+		return
+	}
+
+	router_helper.GenerateResponseMessage(c, userInfo)
+}

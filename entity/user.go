@@ -47,3 +47,21 @@ type UserRegisterResBody struct {
 	PlayAttempt int
 	RoleId int
 }
+
+type UserContext struct {
+	Username string
+	FullName  string
+	Email     string
+	Phone string
+	ProfilePicture string
+	PlayAttempt int
+	RoleId int
+}
+
+type UserEditDetailsReqBody struct {
+	FullName  string 
+	Phone 	string `gorm:"unique"`
+	Email     string `gorm:"unique"`
+	Password  string
+	ProfilePicture string 
+}

@@ -205,8 +205,11 @@ func (u *userUsecaseImpl) UpdateUserDetailsByUsername(username string, reqBody e
 	if err != nil && !errors.Is(err, gorm.ErrRecordNotFound) {
 		return nil, errorlist.InternalServerError()
 	}
-	
-	hashedPass, _ := utils.HashAndSalt(reqBody.Password)
+
+	hashedPass := ""
+	if reqBody.Password != "" {
+		hashedPass, _ = utils.HashAndSalt(reqBody.Password)
+	}
 
 	newUser := entity.User{
 		FullName: reqBody.FullName,

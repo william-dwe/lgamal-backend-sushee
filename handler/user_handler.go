@@ -3,16 +3,12 @@ package handler
 import (
 	"final-project-backend/config"
 	"final-project-backend/errorlist"
-	"fmt"
-	"net/http"
 	"strconv"
-	"strings"
 
 	"final-project-backend/entity"
 	"final-project-backend/handler/router_helper"
 
 	"github.com/gin-gonic/gin"
-	"github.com/golang-jwt/jwt"
 )
 
 func (h *Handler) Register(c *gin.Context) {
@@ -77,23 +73,7 @@ func (h *Handler) Refresh(c *gin.Context) {
 }
 
 func (h *Handler) UserDetail(c *gin.Context) {
-	authHeader := c.GetHeader("Authorization")
-	s := strings.Split(authHeader, "Bearer ")
-	if len(s) < 2 {
-		c.AbortWithStatus(http.StatusUnauthorized)
-		return
-	}
-	encodedToken := s[1]
-	
-	var username string
-	token, _, err := new(jwt.Parser).ParseUnverified(encodedToken, jwt.MapClaims{})
-	if err != nil {
-		fmt.Printf("Error %s", err)
-	}
-
-	if claims, ok := token.Claims.(jwt.MapClaims); ok {
-		username= fmt.Sprint(claims["username"])
-	}
+	username := c.GetString("username")
 
 	userInfo, err := h.userUsecase.GetDetailUserByUsername(username)
 	if err != nil {
@@ -106,24 +86,7 @@ func (h *Handler) UserDetail(c *gin.Context) {
 
 
 func (h *Handler) UpdateUser(c *gin.Context) {
-	authHeader := c.GetHeader("Authorization")
-	s := strings.Split(authHeader, "Bearer ")
-	if len(s) < 2 {
-		c.AbortWithStatus(http.StatusUnauthorized)
-		return
-	}
-	encodedToken := s[1]
-	
-	var username string
-	token, _, err := new(jwt.Parser).ParseUnverified(encodedToken, jwt.MapClaims{})
-	if err != nil {
-		fmt.Printf("Error %s", err)
-	}
-
-	if claims, ok := token.Claims.(jwt.MapClaims); ok {
-		username= fmt.Sprint(claims["username"])
-	}
-
+	username := c.GetString("username")
 
 	var reqBody entity.UserEditDetailsReqBody
 	if err := c.BindJSON(&reqBody); err != nil {

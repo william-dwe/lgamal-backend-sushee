@@ -28,7 +28,7 @@ func CreateRouter(c RouterConfig) *gin.Engine {
 	user := v1.Group("")
 	user.Use(middleware.Authorize)
 	user.GET("/users/me", h.UserDetail)
-	user.PUT("/users/me", h.UpdateUser)
+	user.POST("/users/me", h.UpdateUser)
 	
 	r.NoRoute(h.NotFoundHandler)
 

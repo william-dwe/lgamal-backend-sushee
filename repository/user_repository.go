@@ -2,7 +2,6 @@ package repository
 
 import (
 	"final-project-backend/entity"
-	"fmt"
 
 	"gorm.io/gorm"
 	"gorm.io/gorm/clause"
@@ -82,12 +81,9 @@ func (r *UserRepositoryImpl) GetUserSessionByRefreshToken(t string) (*entity.Ses
 
 func (r *UserRepositoryImpl) UpdateUserDetailsByUsername(username string, newUser *entity.User) error {
 	var user entity.User
-	fmt.Println("USERNAME", username)
-	fmt.Println("UPDATEPREMISE", newUser)
 	err := r.db.Model(&user).
 		Where("username = ?", username).
 		Updates(newUser).
 		Debug().Error
-	fmt.Println("ERR:",err)
 	return err
 }

@@ -1,12 +1,10 @@
 package middleware
 
 import (
-	"encoding/json"
 	"fmt"
 	"strings"
 
 	"final-project-backend/config"
-	"final-project-backend/entity"
 	"final-project-backend/errorlist"
 	"final-project-backend/handler/router_helper"
 	"final-project-backend/utils"
@@ -27,7 +25,7 @@ func Authorize(c *gin.Context) {
 		return
 	}
 	encodedToken := encodedTokenArray[1]
-	
+
 	a :=  utils.NewAuthUtil()
 	token, err := a.ValidateToken(encodedToken, conf.HmacSecretAccessToken)
 	if err != nil || !token.Valid {
@@ -40,14 +38,6 @@ func Authorize(c *gin.Context) {
 		router_helper.GenerateErrorMessage(c, errorlist.UnauthorizedError())
 		return
 	}
-
-	var userJson, _ = json.Marshal(claims["user"])
-	var user entity.UserLoginReqBody
-	if err := json.Unmarshal(userJson, &user); err != nil {
-		router_helper.GenerateErrorMessage(c, errorlist.UnauthorizedError())
-		return
-	}
-
-	c.Set("user", user)
-	fmt.Println("loggedin user: ", user)
+	c.Set("username", claims["username"])
+	fmt.Println("loggedin user: ", claims["username"])
 }

@@ -191,22 +191,26 @@ func (u *userUsecaseImpl) GetDetailUserByUsername(username string) (*entity.User
 func (u *userUsecaseImpl) UpdateUserDetailsByUsername(username string, reqBody entity.UserEditDetailsReqBody) (*entity.UserContext, error) {
 	var nRow int
 	var err error
-	nRow, err = u.userRepository.CheckEmailExistence(reqBody.Email)
-	if nRow > 0 {
-		return nil, errorlist.BadRequestError("email already registered", "EMAIL_EXISTED")
+	if reqBody.Email != "" {
+		nRow, err = u.userRepository.CheckEmailExistence(reqBody.Email)
+		if nRow > 0 {
+			return nil, errorlist.BadRequestError("email already registered", "EMAIL_EXISTED")
+		}
+		if err != nil && !errors.Is(err, gorm.ErrRecordNotFound) {
+			return nil, errorlist.InternalServerError()
+		}
 	}
-	if err != nil && !errors.Is(err, gorm.ErrRecordNotFound) {
-		return nil, errorlist.InternalServerError()
+	
+	if reqBody.Phone != "" {
+		nRow, err = u.userRepository.CheckPhoneExistence(reqBody.Phone)
+		if nRow > 0 {
+			return nil, errorlist.BadRequestError("phone already registered", "PHONE_EXISTED")
+		}
+		if err != nil && !errors.Is(err, gorm.ErrRecordNotFound) {
+			return nil, errorlist.InternalServerError()
+		}
 	}
-
-	nRow, err = u.userRepository.CheckPhoneExistence(reqBody.Phone)
-	if nRow > 0 {
-		return nil, errorlist.BadRequestError("phone already registered", "PHONE_EXISTED")
-	}
-	if err != nil && !errors.Is(err, gorm.ErrRecordNotFound) {
-		return nil, errorlist.InternalServerError()
-	}
-
+	
 	hashedPass := ""
 	if reqBody.Password != "" {
 		hashedPass, _ = utils.HashAndSalt(reqBody.Password)

@@ -118,7 +118,15 @@ func (h *Handler) UpdateProfile(c *gin.Context) {
 		return
 	}
 
-	response := entity.UserProfileUploadResBody{Url:uploadUrl}
+	updateProfileReq := entity.UserEditDetailsReqBody{
+		ProfilePicture: uploadUrl,
+	}
 
-	router_helper.GenerateResponseMessage(c, response)
+	userInfo, err := h.userUsecase.UpdateUserDetailsByUsername(username, updateProfileReq)
+	if err != nil {
+		router_helper.GenerateErrorMessage(c, err)
+		return
+	}
+
+	router_helper.GenerateResponseMessage(c, userInfo)
 }

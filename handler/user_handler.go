@@ -104,21 +104,24 @@ func (h *Handler) UpdateUser(c *gin.Context) {
 	router_helper.GenerateResponseMessage(c, userInfo)
 }
 
-func (h *Handler) UpdateProfile(c *gin.Context) {
+func (h *Handler) UpdateUserProfile(c *gin.Context) {
 	username := c.GetString("username")
-	formFile, _, err := c.Request.FormFile("file")
-	if err != nil {
-		router_helper.GenerateErrorMessage(c, errorlist.BadRequestError("should provide the profile picture file", "UPDATE_INPUT_INCOMPLETE"))
-		return
+	var formFile entity.UserProfileUploadReqBody
+	if err := c.ShouldBind(&formFile); err != nil {
+		router_helper.GenerateErrorMessage(c, errorlist.BadRequestError("wrong input structure", "UPDATE_INPUT_INCOMPLETE"))
 	}
 
-	uploadUrl, err := utils.NewMediaUpload().FileUpload(username, entity.UserProfileUploadReqBody{File: formFile})
+	uploadUrl, err := utils.NewMediaUpload().FileUpload(username, formFile)
 	if err != nil {
 		router_helper.GenerateErrorMessage(c, err)
 		return
 	}
 
 	updateProfileReq := entity.UserEditDetailsReqBody{
+		FullName: formFile.FullName,
+		Phone: formFile.Phone,
+		Email: formFile.Email,
+		Password: formFile.Password,
 		ProfilePicture: uploadUrl,
 	}
 

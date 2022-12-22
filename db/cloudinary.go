@@ -3,7 +3,6 @@ package db
 import (
 	"context"
 	"final-project-backend/config"
-	"fmt"
 	"time"
 
 	"github.com/cloudinary/cloudinary-go/v2"
@@ -33,27 +32,31 @@ func ImageUploadHelper(username string, input interface{}) (string, error) {
 			AllowedFormats: api.CldAPIArray{"jpg","jpeg","png"},
 		},
 	)
+
 	if err != nil {
 		return "", err
 	}
 	return uploadResult.SecureURL, nil
 }
 
-func TransformImage(cld *cloudinary.Cloudinary, ctx context.Context) {
-    // Instantiate an object for the asset with public ID "my_image"
-    qs_img, err := cld.Image("quickstart_butterfly")
+func GetTransformedImageHelper(username string) (string, error){
+	conf := config.Config.CloudinaryConfig
+	cld, err := cloudinary.NewFromParams(conf.CloudName, conf.APIKey, conf.APISecret)
+	if err != nil {
+		return "", err
+	}
+
+    qs_img, err := cld.Image(username)
     if err != nil {
-        fmt.Println("error")
+		return "", err
     }
 
-    // Add the transformation
-    qs_img.Transformation = "r_max/e_sepia"
+    qs_img.Transformation = "w_400,h_400,c_fill,r_max"
 
-    // Generate and log the delivery URL
     new_url, err := qs_img.String()
     if err != nil {
-        fmt.Println("error")
-    } else {
-        print("****4. Transform the image****\nTransfrmation URL: ", new_url)
-    }
+        return "", err
+    } 
+    
+	return new_url, nil
 }

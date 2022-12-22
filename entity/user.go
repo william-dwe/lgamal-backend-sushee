@@ -68,10 +68,9 @@ type UserEditDetailsReqBody struct {
 }
 
 type UserProfileUploadReqBody struct {
-	File multipart.File `json:"file,omitempty" validate:"required"`
+	FullName string `form:"full_name,omitempty"`
+	Email string `form:"email,omitempty"`
+	Phone string `form:"phone,omitempty"`
+	Password  string `form:"password,omitempty"`
+	Img *multipart.FileHeader `form:"img,omitempty"`
 }
-
-type UserProfileUploadResBody struct {
-	Url string `json:"url,omitempty" validate:"required"`
-}
-

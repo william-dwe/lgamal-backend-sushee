@@ -1,10 +1,9 @@
 package main
 
 import (
-	"fmt"
-
 	"final-project-backend/db"
 	"final-project-backend/server"
+	"fmt"
 )
 
 func main() {

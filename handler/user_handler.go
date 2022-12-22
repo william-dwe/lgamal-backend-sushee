@@ -3,6 +3,7 @@ package handler
 import (
 	"final-project-backend/config"
 	"final-project-backend/errorlist"
+	"final-project-backend/utils"
 	"strconv"
 
 	"final-project-backend/entity"
@@ -60,7 +61,7 @@ func (h *Handler) Login(c *gin.Context) {
 func (h *Handler) Refresh(c *gin.Context) {
 	refreshToken, err := c.Cookie("refreshToken")
 	if err != nil {
-		router_helper.GenerateErrorMessage(c, err)
+		router_helper.GenerateErrorMessage(c, errorlist.UnauthorizedError())
 		return
 	}
 
@@ -101,4 +102,23 @@ func (h *Handler) UpdateUser(c *gin.Context) {
 	}
 
 	router_helper.GenerateResponseMessage(c, userInfo)
+}
+
+func (h *Handler) UpdateProfile(c *gin.Context) {
+	username := c.GetString("username")
+	formFile, _, err := c.Request.FormFile("file")
+	if err != nil {
+		router_helper.GenerateErrorMessage(c, errorlist.BadRequestError("should provide the profile picture file", "UPDATE_INPUT_INCOMPLETE"))
+		return
+	}
+
+	uploadUrl, err := utils.NewMediaUpload().FileUpload(username, entity.UserProfileUploadReqBody{File: formFile})
+	if err != nil {
+		router_helper.GenerateErrorMessage(c, err)
+		return
+	}
+
+	response := entity.UserProfileUploadResBody{Url:uploadUrl}
+
+	router_helper.GenerateResponseMessage(c, response)
 }

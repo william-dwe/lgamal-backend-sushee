@@ -139,6 +139,7 @@ func (u *userUsecaseImpl) Login(identifier, password string) (*entity.UserLoginR
 func (u *userUsecaseImpl) Refresh(refreshToken string) (*entity.UserLoginResBody, error) {
 	var err error
 	a := utils.NewAuthUtil()
+
 	_, err = a.ValidateToken(refreshToken, config.Config.AuthConfig.HmacSecretRefreshToken)
 	if err != nil {
 		return nil, err

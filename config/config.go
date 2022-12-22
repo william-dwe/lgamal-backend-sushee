@@ -22,9 +22,18 @@ type authConfig struct {
 	HmacSecretRefreshToken string
 	IsTesting  string
 }
+
+
+type cloudinaryConfig struct {
+	CloudName string
+	APIKey string
+	APISecret string
+	Folder string
+}
 type AppConfig struct {
 	DBConfig   dbConfig
 	AuthConfig authConfig
+	CloudinaryConfig cloudinaryConfig
 }
 
 func initConfig() AppConfig {
@@ -49,6 +58,12 @@ func initConfig() AppConfig {
 			HmacSecretAccessToken: getENV("HMAC_SECRET_ACCESS_TOKEN", "very-secret"),
 			HmacSecretRefreshToken: getENV("HMAC_SECRET_REFRESH_TOKEN", "super-secret"),
 			IsTesting:  getENV("IS_TESTING", "true"),
+		},
+		CloudinaryConfig: cloudinaryConfig{
+			CloudName: getENV("CLOUDINARY_CLOUD_NAME", ""),
+			APIKey: getENV("CLOUDINARY_API_KEY", ""),
+			APISecret: getENV("CLOUDINARY_API_SECRET", ""),
+			Folder: getENV("CLOUDINARY_PPROFILE_DIR", ""),
 		},
 	}
 }

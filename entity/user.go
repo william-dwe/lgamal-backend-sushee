@@ -1,6 +1,7 @@
 package entity
 
 import (
+	"mime/multipart"
 	"time"
 
 	"gorm.io/gorm"
@@ -65,3 +66,12 @@ type UserEditDetailsReqBody struct {
 	Password  string
 	ProfilePicture string 
 }
+
+type UserProfileUploadReqBody struct {
+	File multipart.File `json:"file,omitempty" validate:"required"`
+}
+
+type UserProfileUploadResBody struct {
+	Url string `json:"url,omitempty" validate:"required"`
+}
+

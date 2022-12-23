@@ -30,7 +30,7 @@ func (*media) FileUpload(username string, reqBody entity.UserProfileUploadReqBod
     if err != nil {
         return "", err
     }
-
+	
 	file, err := reqBody.Img.Open()
 	if err != nil {
 		return "", err

@@ -4,6 +4,7 @@ import (
 	"final-project-backend/config"
 	"final-project-backend/errorlist"
 	"final-project-backend/utils"
+	"fmt"
 	"strconv"
 
 	"final-project-backend/entity"
@@ -85,36 +86,28 @@ func (h *Handler) UserDetail(c *gin.Context) {
 	router_helper.GenerateResponseMessage(c, userInfo)
 }
 
-
-func (h *Handler) UpdateUser(c *gin.Context) {
-	username := c.GetString("username")
-
-	var reqBody entity.UserEditDetailsReqBody
-	if err := c.BindJSON(&reqBody); err != nil {
-		router_helper.GenerateErrorMessage(c, errorlist.BadRequestError("should provide the changes", "UPDATE_INPUT_INCOMPLETE"))
-		return
-	}
-
-	userInfo, err := h.userUsecase.UpdateUserDetailsByUsername(username, reqBody)
-	if err != nil {
-		router_helper.GenerateErrorMessage(c, err)
-		return
-	}
-
-	router_helper.GenerateResponseMessage(c, userInfo)
-}
-
 func (h *Handler) UpdateUserProfile(c *gin.Context) {
 	username := c.GetString("username")
 	var formFile entity.UserProfileUploadReqBody
+	fmt.Println("-=-=-=-=-=-=-=-=-=-=-=-=-=-")
+	fmt.Println("BEFORE BIND:", formFile)
+	
 	if err := c.ShouldBind(&formFile); err != nil {
-		router_helper.GenerateErrorMessage(c, errorlist.BadRequestError("wrong input structure", "UPDATE_INPUT_INCOMPLETE"))
+		router_helper.GenerateErrorMessage(c, errorlist.BadRequestError("invalid input", "UPDATE_INPUT_INCOMPLETE"))
 	}
 
-	uploadUrl, err := utils.NewMediaUpload().FileUpload(username, formFile)
-	if err != nil {
-		router_helper.GenerateErrorMessage(c, err)
-		return
+	fmt.Println("-=-=-=-=-=-=-=-=-=-=-=-=-=-")
+	fmt.Println("AFTER BIND:", formFile)
+	fmt.Println("-=-=-=-=-=-=-=-=-=-=-=-=-=-")
+
+	var uploadUrl string
+	var err error
+	if formFile.Img != nil {
+		uploadUrl, err = utils.NewMediaUpload().FileUpload(username, formFile)
+		if err != nil {
+			router_helper.GenerateErrorMessage(c, err)
+			return
+		}
 	}
 
 	updateProfileReq := entity.UserEditDetailsReqBody{

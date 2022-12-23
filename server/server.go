@@ -14,13 +14,21 @@ func initRouter() *gin.Engine {
 	userRepo := repository.NewUserRepository(repository.UserRepositoryConfig{
 		DB: db.Get(),
 	})
+	menuRepo := repository.NewMenuRepository(repository.MenuRepositoryConfig{
+		DB: db.Get(),
+	})
 
 	userUsecase := usecase.NewUserUsecase(usecase.UserUsecaseConfig{
 		UserRepository:   userRepo,
 	})
+	menuUsecase := usecase.NewMenuUsecase(usecase.MenuUsecaseConfig{
+		MenuRepository:   menuRepo,
+	})
+
 
 	r := CreateRouter(RouterConfig{
 		UserUsecase:        userUsecase,
+		MenuUsecase: 		menuUsecase,
 	})
 	return r
 }

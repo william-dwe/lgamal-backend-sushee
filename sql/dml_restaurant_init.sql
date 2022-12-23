@@ -14,3 +14,20 @@ insert into users (full_name, phone, email, username, password, register_date, p
 insert into users (full_name, phone, email, username, password, register_date, profile_picture, play_attempt, role_id) values ('Jo-anne Kernar', '7251531487', 'jkernar3@paypal.com', 'jkernar3', '$2a$04$GX1pJVxU55hAE6cPZoq2h.6PDJuSKz.PdSZOgVVDb10Ersbd5iAMC', '2022-03-14', null, 1, 1);
 insert into users (full_name, phone, email, username, password, register_date, profile_picture, play_attempt, role_id) values ('Donetta Gardener', '4814877652', 'dgardener4@youtu.be', 'dgardener4', '$2a$04$ULAmhc1a.xte8qPwcJk4a.Jdbn8GyRALa0LCC0C0cSdpE47bJFzYK', '2022-10-12', null, 4, 1);
 insert into users (full_name, phone, email, username, password, register_date, profile_picture, play_attempt, role_id) values ('Admin Admin', '8532753943', 'admin@mail.com', 'admin', '$2a$04$MegFiHl0PLKEXaGXpjMFf.BgBDodVLflV6nsh1/N1z2nupXACEIdO', '2022-10-12', null, 4, 2);
+
+insert into categories (id, category_name) values (1, 'appetizers'), (2, 'meals'), (3, 'drinks');
+
+insert into menus (menu_name, avg_rating, number_of_favorites, price, menu_photo, category_id)
+values 
+('Nori', 0, 0, 10000, 'https://res.cloudinary.com/dgr6o89ym/image/upload/v1671772130/menu/appetizer-nori_rdfbss.png', 1),
+('Edamame', 0, 0, 11000, 'https://res.cloudinary.com/dgr6o89ym/image/upload/v1671771968/menu/appetizer-edamame_d0slsa.png', 1),
+('Spring Roll', 0, 0, 12000, 'https://res.cloudinary.com/dgr6o89ym/image/upload/v1671771968/menu/appetizer-spring_roll_m1wmfy.png', 1),
+('Salmon Maki', 0, 0, 13000, 'https://res.cloudinary.com/dgr6o89ym/image/upload/v1671771968/menu/meals-salmon_maki_dqhlg9.png', 2),
+('California Roll', 0, 0, 14000, 'https://res.cloudinary.com/dgr6o89ym/image/upload/v1671771968/menu/meals-california_roll_y0r8ca.png', 2),
+('Salmon Sashimi', 0, 0, 15000, 'https://res.cloudinary.com/dgr6o89ym/image/upload/v1671771969/menu/meals-salmon_sashimi_er9fdd.png', 2),
+('Salmon Nigiri', 0, 0, 13000, 'https://res.cloudinary.com/dgr6o89ym/image/upload/v1671771969/menu/meals-salmon_nigiri_nml4nk.png', 2),
+('Sushi Platter', 0, 0, 40000, 'https://res.cloudinary.com/dgr6o89ym/image/upload/v1671771969/menu/meals-sushi_plater_vvwyhe.png', 2),
+('Lemon Tea', 0, 0, 12000, 'https://res.cloudinary.com/dgr6o89ym/image/upload/v1671771968/menu/drinks-lemon_tea_owmrxz.png', 3),
+('Mint Tea', 0, 0, 12000, 'https://res.cloudinary.com/dgr6o89ym/image/upload/v1671771967/menu/drinks-mint_tea_mgwedf.png', 3);
+
+insert into favorited_menus (user_id, menu_id) values (1,1);

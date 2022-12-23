@@ -10,15 +10,18 @@ import (
 
 type Handler struct {
 	userUsecase        usecase.UserUsecase
+	menuUsecase 		usecase.MenuUsecase
 }
 
 type HandlerConfig struct {
 	UserUsecase        usecase.UserUsecase
+	MenuUsecase        usecase.MenuUsecase
 }
 
 func New(c HandlerConfig) *Handler {
 	return &Handler{
 		userUsecase:        c.UserUsecase,
+		menuUsecase: 	c.MenuUsecase,
 	}
 }
 

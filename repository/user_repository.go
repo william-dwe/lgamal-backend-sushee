@@ -10,9 +10,9 @@ import (
 type UserRepository interface {
 	GetUserById(i int) (*entity.User, error)
 	GetUserByEmailOrUsername(string) (*entity.User, error)
-	CheckEmailExistence(string) (int, error)
 	CheckUsernameExistence(string) (int, error)
-	CheckPhoneExistence(i string) (int, error)
+	CheckEmailExistence(string) (string, int, error)
+	CheckPhoneExistence(string) (string, int, error)
 	AddNewUser(*entity.User) (*entity.User, error)
 	AddNewUserSession(s *entity.Session) (*entity.Session, error)
 	GetUserSessionByRefreshToken(t string) (*entity.Session, error) 
@@ -45,22 +45,23 @@ func (r *UserRepositoryImpl) GetUserByEmailOrUsername(i string) (*entity.User, e
 	return &user, err
 }
 
-func (r *UserRepositoryImpl) CheckEmailExistence(i string) (int, error) {
-	var user entity.User
-	tx := r.db.Clauses(clause.OnConflict{DoNothing: true}).Where("email = ?", i).First(&user)
-	return int(tx.RowsAffected), tx.Error
-}
-
 func (r *UserRepositoryImpl) CheckUsernameExistence(i string) (int, error) {
 	var user entity.User
 	tx := r.db.Clauses(clause.OnConflict{DoNothing: true}).Where("email = ?", i).Or("username = ?", i).First(&user)
 	return int(tx.RowsAffected), tx.Error
 }
 
-func (r *UserRepositoryImpl) CheckPhoneExistence(i string) (int, error) {
+func (r *UserRepositoryImpl) CheckEmailExistence(i string) (string, int, error) {
+	var user entity.User
+	tx := r.db.Clauses(clause.OnConflict{DoNothing: true}).Where("email = ?", i).First(&user)
+	return user.Username, int(tx.RowsAffected), tx.Error
+}
+
+
+func (r *UserRepositoryImpl) CheckPhoneExistence(i string) (string, int, error) {
 	var user entity.User
 	tx := r.db.Clauses(clause.OnConflict{DoNothing: true}).Where("phone = ?", i).First(&user)
-	return int(tx.RowsAffected), tx.Error
+	return user.Username, int(tx.RowsAffected), tx.Error
 }
 
 func (r *UserRepositoryImpl) AddNewUser(u *entity.User) (*entity.User, error) {

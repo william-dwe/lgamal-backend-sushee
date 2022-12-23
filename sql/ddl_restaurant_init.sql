@@ -31,7 +31,7 @@ CREATE TABLE IF NOT EXISTS users (
 	deleted_at TIMESTAMP NULL
 );
 
-CREATE TABLE IF NOT EXISTS session (
+CREATE TABLE IF NOT EXISTS sessions (
 	id SERIAL PRIMARY KEY,
 	refresh_token VARCHAR,
 	user_id INT,
@@ -41,6 +41,40 @@ CREATE TABLE IF NOT EXISTS session (
 	updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
 	deleted_at TIMESTAMP NULL
 );
+
+CREATE TABLE IF NOT EXISTS categories (
+	id SERIAL primary key,
+	category_name varchar,
+	created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+	updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+	deleted_at TIMESTAMP NULL
+);
+
+CREATE TABLE IF NOT EXISTS menus (
+	id SERIAL PRIMARY KEY,
+	menu_name VARCHAR,
+	avg_rating numeric,
+	number_of_favorites numeric,
+	price numeric,
+	menu_photo varchar,
+	category_id INT,
+	foreign key (category_id) references categories(id),
+	created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+	updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+	deleted_at TIMESTAMP NULL
+);
+
+CREATE TABLE IF NOT EXISTS favorited_menus (
+	id SERIAL PRIMARY KEY,
+	user_id INT,
+	foreign key (user_id) references users(id),
+	menu_id INT,
+	foreign key (menu_id) references menus(id),
+	created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+	updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+	deleted_at TIMESTAMP NULL
+);
+
 
 -- CREATE SEQUENCE wallet_id_sequence
 --   INCREMENT 1

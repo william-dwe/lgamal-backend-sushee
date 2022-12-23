@@ -10,6 +10,7 @@ import (
 
 type RouterConfig struct {
 	UserUsecase        usecase.UserUsecase
+	MenuUsecase 	usecase.MenuUsecase
 }
 
 func CreateRouter(c RouterConfig) *gin.Engine {
@@ -18,9 +19,11 @@ func CreateRouter(c RouterConfig) *gin.Engine {
 
 	h := handler.New(handler.HandlerConfig{
 		UserUsecase:        c.UserUsecase,
+		MenuUsecase: c.MenuUsecase,
 	})
 
 	v1 := r.Group("/v1")
+	v1.GET("/menu", h.ShowMenu)
 	v1.POST("/login", h.Login)
 	v1.POST("/register", h.Register)
 	v1.GET("/refresh", h.Refresh)
@@ -28,8 +31,7 @@ func CreateRouter(c RouterConfig) *gin.Engine {
 	user := v1.Group("")
 	user.Use(middleware.Authorize)
 	user.GET("/users/me", h.UserDetail)
-	user.POST("/users/me", h.UpdateUser)
-	user.POST("/users/me/profile", h.UpdateUserProfile)
+	user.POST("/users/me", h.UpdateUserProfile)
 	
 	r.NoRoute(h.NotFoundHandler)
 

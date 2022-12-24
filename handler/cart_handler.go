@@ -37,3 +37,15 @@ func (h *Handler) ShowCart(c *gin.Context) {
 
 	router_helper.GenerateResponseMessage(c, t)
 }
+
+func (h *Handler) DeleteCart(c *gin.Context) {
+	username := c.GetString("username")
+
+	err := h.cartUsecase.DeleteCart(username)
+	if err != nil {
+		router_helper.GenerateErrorMessage(c, err)
+		return
+	}
+
+	router_helper.GenerateResponseMessage(c, "Cart has been cleared")
+}

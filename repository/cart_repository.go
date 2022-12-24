@@ -9,9 +9,9 @@ import (
 type CartRepository interface {
 	AddItemToCart(c *entity.Cart) (*entity.Cart, error)
 	GetCartByUsername(username string) (*[]entity.Cart, error)
-	// DeleteCart(username string) (error)
+	DeleteCart(username string) (error)
 	// DeleteCartByCartId(username string, cartId int) (error)
-	// UpdateCartByCartId(username string, cartId int, updatePremises *entity.Cart) (*entity.Cart, error)
+	// UpdateCartByCartId(username string, cartId int, updatePremises *entity.Cart) (error)
 }
 
 type CartRepositoryImpl struct {
@@ -51,3 +51,18 @@ func (r *CartRepositoryImpl) GetCartByUsername(username string) (*[]entity.Cart,
 	err := query.Error
 	return &carts, err
 }
+
+func (r *CartRepositoryImpl) DeleteCart(username string) (error) {
+	var carts []entity.Cart
+
+	userSQ := r.db.
+		Select("id").
+		Where("username = (?)", username).
+		Table("users")
+	query := r.db.
+		Where("user_id = (?) AND is_ordered != (?)", userSQ, true).
+		Delete(&carts)
+
+	err := query.Error
+	return err
+}  

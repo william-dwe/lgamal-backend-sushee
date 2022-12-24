@@ -12,6 +12,7 @@ import (
 type CartUsecase interface {
 	GetCart(username string) (*[]entity.Cart, error)
 	AddCart(username string, c *entity.CartReqBody) (*entity.Cart, error)
+	DeleteCart(username string) (error)
 }
 
 type cartUsecaseImpl struct {
@@ -65,4 +66,17 @@ func (u *cartUsecaseImpl) AddCart(username string, c *entity.CartReqBody) (*enti
 	}
 	
 	return cart, nil
+}
+
+
+func (u *cartUsecaseImpl) DeleteCart(username string) (error) {
+	err := u.cartRepository.DeleteCart(username)
+	if errors.Is(err, gorm.ErrRecordNotFound) {
+		return errorlist.BadRequestError("no cart found", "NO_CART_FOUND")
+	}
+	if err != nil && !errors.Is(err, gorm.ErrRecordNotFound) {
+		return errorlist.InternalServerError()
+	}
+	
+	return nil
 }

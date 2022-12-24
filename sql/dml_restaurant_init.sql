@@ -29,5 +29,18 @@ values
 ('Sushi Platter', 0, 0, 40000, 'https://res.cloudinary.com/dgr6o89ym/image/upload/v1671771969/menu/meals-sushi_plater_vvwyhe.png', 2),
 ('Lemon Tea', 0, 0, 12000, 'https://res.cloudinary.com/dgr6o89ym/image/upload/v1671771968/menu/drinks-lemon_tea_owmrxz.png', 3),
 ('Mint Tea', 0, 0, 12000, 'https://res.cloudinary.com/dgr6o89ym/image/upload/v1671771967/menu/drinks-mint_tea_mgwedf.png', 3);
-
 insert into favorited_menus (user_id, menu_id) values (1,1);
+insert into menu_customs(menu_id, customization) values (1, 'size:big/small'), (1,'extra sauce:yes/no'), (2,'size:big/small');
+
+insert into promotions(admin_id, name, description, promotion_photo, discount_rate, started_at, expired_at)
+values 
+	(1, 'California for Xmas', 'Discount 50% for California roll', 'https://res.cloudinary.com/dgr6o89ym/image/upload/v1671771968/menu/meals-california_roll_y0r8ca.png', 0.5, current_timestamp, current_date + INTERVAL '1 day'),
+	(1, 'Drinks on the house', 'Discount 30% for all drinks', 'https://res.cloudinary.com/dgr6o89ym/image/upload/v1671771968/menu/drinks-lemon_tea_owmrxz.png', 0.3, current_timestamp, current_date + INTERVAL '2 day');
+insert into promo_menus(promotion_id, menu_id)
+values
+	(1, 5),
+	(2, 8),
+	(2, 9);
+
+insert into carts(user_id, promotion_id, menu_id, quantity, menu_option) 
+values (1, 1, null, 1, '{"size":"big"}');

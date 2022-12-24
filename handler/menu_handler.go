@@ -44,3 +44,15 @@ func (h *Handler) ShowMenu(c *gin.Context) {
 
 	router_helper.GenerateResponseMessage(c, respBody)
 }
+
+func (h *Handler) ShowPromotion(c *gin.Context) {
+	t, err := h.menuUsecase.GetPromotion()
+	if err != nil {
+		router_helper.GenerateErrorMessage(c, err)
+		return
+	}
+
+	router_helper.GenerateResponseMessage(c, t)
+}
+
+// todo add menu detail

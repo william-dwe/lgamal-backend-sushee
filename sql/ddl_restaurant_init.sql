@@ -75,23 +75,107 @@ CREATE TABLE IF NOT EXISTS favorited_menus (
 	deleted_at TIMESTAMP NULL
 );
 
+CREATE TABLE IF NOT EXISTS menu_customs (
+	id SERIAL primary key,
+	menu_id int,
+	foreign key (menu_id) references menus(id),
+	customization varchar,
+	created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+	updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+	deleted_at TIMESTAMP NULL
+);
 
--- CREATE SEQUENCE wallet_id_sequence
---   INCREMENT 1
---   MINVALUE 1
---   MAXVALUE 999000
---   START 100000
---   CACHE 1;
 
--- CREATE TABLE IF NOT EXISTS wallets(
--- 	id INTEGER PRIMARY KEY DEFAULT NEXTVAL('666666666wallet_id_sequence'),
--- 	user_id INT,
--- 	FOREIGN KEY (user_id) REFERENCES users(id),
--- 	balance NUMERIC,
--- 	created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
--- 	updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
--- 	deleted_at TIMESTAMP NULL
--- );
+CREATE TABLE IF NOT EXISTS promotions (
+	id SERIAL PRIMARY KEY,
+	admin_id INT,
+	foreign key (admin_id) references users(id),
+	name VARCHAR,
+	description VARCHAR,
+	promotion_photo varchar,
+	discount_rate numeric,
+	started_at TIMESTAMP not null DEFAULT CURRENT_TIMESTAMP,
+	expired_at TIMESTAMP null,
+	created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+	updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+	deleted_at TIMESTAMP NULL
+);
 
--- ALTER SEQUENCE wallet_id_sequence
--- OWNED BY wallets.id;
+CREATE TABLE IF NOT EXISTS promo_menus (
+	id SERIAL PRIMARY KEY,
+	promotion_id INT,
+	foreign key (promotion_id) references promotions(id),
+	menu_id INT,
+	foreign key (menu_id) references menus(id),
+	created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+	updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+	deleted_at TIMESTAMP NULL
+);
+
+create table if not exists carts (
+	id SERIAL PRIMARY KEY,
+	user_id INT,
+	foreign key (user_id) references users(id),
+	promotion_id INT,
+	foreign key (promotion_id) references promotions(id),
+	menu_id INT,
+	foreign key (menu_id) references menus(id),
+	quantity int,
+	menu_option json,
+	is_ordered boolean default false,
+	created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+	updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+	deleted_at TIMESTAMP NULL
+);
+
+CREATE TABLE IF NOT EXISTS payment_options (
+	id SERIAL primary key,
+	payment_name varchar,
+	created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+	updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+	deleted_at TIMESTAMP NULL
+);
+
+create table if not exists coupons (
+	id SERIAL primary key,
+	admin_id INT,
+	foreign key (admin_id) references users(id),
+	description VARCHAR,
+	coupon_discount_amount numeric,
+	quota_initial numeric,
+	quota_left numeric,
+	created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+	updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+	deleted_at TIMESTAMP NULL
+)
+
+create table if not exists orders (
+	id SERIAL PRIMARY KEY,
+	user_id INT,
+	foreign key (user_id) references users(id),
+	order_date TIMESTAMP not null default CURRENT_TIMESTAMP,
+	coupon_id INT,
+	foreign key (coupon_id) references coupons(id),
+	payment_options_id INT,
+	foreign key (payment_options_id) references payment_options(id),
+	created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+	updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+	deleted_at TIMESTAMP NULL
+);
+
+
+create table if not exists ordered_menus (
+	id SERIAL PRIMARY KEY,
+	order_id INT,
+	foreign key (order_id) references orders(id),
+	menu_id INT,
+	foreign key (menu_id) references menus(id),
+	promotion_id INT,
+	foreign key (promotion_id) references promotions(id),
+	quantity int,
+	menu_option json,
+	created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+	updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+	deleted_at TIMESTAMP NULL
+);
+	

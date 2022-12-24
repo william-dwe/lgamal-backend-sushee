@@ -3,6 +3,7 @@ package repository
 import (
 	"final-project-backend/entity"
 	"strings"
+	"time"
 
 	"gorm.io/gorm"
 	"gorm.io/gorm/clause"
@@ -10,6 +11,7 @@ import (
 
 type MenuRepository interface {
 	GetMenu(entity.MenuQuery) (*[]entity.Menu, int, error)
+	GetPromotionMenu() (*[]entity.Promotion, error)
 }
 
 type MenuRepositoryImpl struct {
@@ -27,19 +29,19 @@ func NewMenuRepository(c MenuRepositoryConfig) MenuRepository {
 }
 
 func (r *MenuRepositoryImpl) GetMenu(q entity.MenuQuery) (*[]entity.Menu, int, error) {
-	var Menus []entity.Menu
+	var menus []entity.Menu
 
-	MenuCategorySQ := r.db.
+	menuCategorySQ := r.db.
 		Select("id").
 		Where("category_name IN (?)", strings.Split(q.FilterByCategory, ",")).
 		Or("'' = ?", q.FilterByCategory).
 		Table("categories")
-	MenuSubQuery := r.db.
+	menuSQ := r.db.
 		Joins("menus").
-		Where("category_id IN (?)", MenuCategorySQ).
+		Where("category_id IN (?)", menuCategorySQ).
 		Table("menus")
 	query := r.db.
-		Table("(?) as th", MenuSubQuery).
+		Table("(?) as th", menuSQ).
 		Where("menu_name ilike ?", "%"+q.Search+"%").
 		Order(clause.OrderByColumn{
 			Column: clause.Column{
@@ -49,9 +51,17 @@ func (r *MenuRepositoryImpl) GetMenu(q entity.MenuQuery) (*[]entity.Menu, int, e
 		}).
 		Limit(q.Limit).
 		Offset(q.Page*q.Limit - q.Limit).
-		Find(&Menus)
+		Find(&menus)
 	var rows int64
-	MenuSubQuery.Count(&rows)
+	menuSQ.Count(&rows)
 	err := query.Error
-	return &Menus, int(rows), err
+	return &menus, int(rows), err
+}
+
+func (r *MenuRepositoryImpl) GetPromotionMenu() (*[]entity.Promotion, error) {
+	var promotions []entity.Promotion
+	err := r.db.
+		Where("? between started_at and expired_at", time.Now()).
+		Find(&promotions).Error
+	return &promotions, err
 }

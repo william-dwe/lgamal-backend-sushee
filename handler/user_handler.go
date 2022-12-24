@@ -74,7 +74,7 @@ func (h *Handler) Refresh(c *gin.Context) {
 	router_helper.GenerateResponseMessage(c, accessToken)
 }
 
-func (h *Handler) UserDetail(c *gin.Context) {
+func (h *Handler) ShowUserDetail(c *gin.Context) {
 	username := c.GetString("username")
 
 	userInfo, err := h.userUsecase.GetDetailUserByUsername(username)

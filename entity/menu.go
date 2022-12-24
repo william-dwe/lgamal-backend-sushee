@@ -1,6 +1,8 @@
 package entity
 
 import (
+	"time"
+
 	"gorm.io/gorm"
 )
 
@@ -32,4 +34,15 @@ type MenuResBody struct {
 type MenuCategory struct {
 	gorm.Model
 	CategoryName string
+}
+
+type Promotion struct {
+	gorm.Model
+	AdminId int
+	Name string
+	Description string
+	PromotionPhoto string
+	DiscountRate float64
+	StartAt time.Time
+	expiredAt time.Time
 }

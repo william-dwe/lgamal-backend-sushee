@@ -11,7 +11,7 @@ import (
 
 type MenuUsecase interface {
 	GetMenu(entity.MenuQuery) (*[]entity.Menu, int, error)
-
+	GetPromotion() (*[]entity.Promotion, error)
 }
 
 type menuUsecaseImpl struct {
@@ -40,4 +40,17 @@ func (u *menuUsecaseImpl) GetMenu(q entity.MenuQuery) (*[]entity.Menu, int, erro
 	
 	maxPage := (rows + q.Limit - 1)/ q.Limit
 	return menus, maxPage, nil
+}
+
+
+func (u *menuUsecaseImpl) GetPromotion() (*[]entity.Promotion, error) {
+	menus, err := u.menuRepository.GetPromotionMenu()
+	if errors.Is(err, gorm.ErrRecordNotFound) || len(*menus) == 0 {
+		return nil, errorlist.BadRequestError("no menu found", "NO_MENU_FOUND")
+	}
+	if err != nil && !errors.Is(err, gorm.ErrRecordNotFound) {
+		return nil, errorlist.InternalServerError()
+	}
+	
+	return menus, nil
 }

@@ -4,7 +4,6 @@ import (
 	"final-project-backend/config"
 	"final-project-backend/errorlist"
 	"final-project-backend/utils"
-	"fmt"
 	"strconv"
 
 	"final-project-backend/entity"
@@ -89,16 +88,10 @@ func (h *Handler) ShowUserDetail(c *gin.Context) {
 func (h *Handler) UpdateUserProfile(c *gin.Context) {
 	username := c.GetString("username")
 	var formFile entity.UserProfileUploadReqBody
-	fmt.Println("-=-=-=-=-=-=-=-=-=-=-=-=-=-")
-	fmt.Println("BEFORE BIND:", formFile)
 	
 	if err := c.ShouldBind(&formFile); err != nil {
 		router_helper.GenerateErrorMessage(c, errorlist.BadRequestError("invalid input", "UPDATE_INPUT_INCOMPLETE"))
 	}
-
-	fmt.Println("-=-=-=-=-=-=-=-=-=-=-=-=-=-")
-	fmt.Println("AFTER BIND:", formFile)
-	fmt.Println("-=-=-=-=-=-=-=-=-=-=-=-=-=-")
 
 	var uploadUrl string
 	var err error

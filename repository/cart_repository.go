@@ -2,6 +2,7 @@ package repository
 
 import (
 	"final-project-backend/entity"
+	"fmt"
 
 	"gorm.io/gorm"
 )
@@ -9,9 +10,10 @@ import (
 type CartRepository interface {
 	AddItemToCart(c *entity.Cart) (*entity.Cart, error)
 	GetCartByUsername(username string) (*[]entity.Cart, error)
+	GetCartByCartId(cartId int) (*entity.Cart, error)
 	DeleteCart(username string) (error)
-	// DeleteCartByCartId(username string, cartId int) (error)
-	// UpdateCartByCartId(username string, cartId int, updatePremises *entity.Cart) (error)
+	DeleteCartByCartId(cartId int) (error)
+	UpdateCartByCartId(cartId int, updatePremises *entity.Cart) (error)
 }
 
 type CartRepositoryImpl struct {
@@ -30,6 +32,7 @@ func NewCartRepository(c CartRepositoryConfig) CartRepository {
 
 func (r *CartRepositoryImpl) AddItemToCart(c *entity.Cart) (*entity.Cart, error) {
 	err := r.db.Create(&c).Error
+	fmt.Println("err:", err)
 	return c, err
 }
 
@@ -52,6 +55,17 @@ func (r *CartRepositoryImpl) GetCartByUsername(username string) (*[]entity.Cart,
 	return &carts, err
 }
 
+func (r *CartRepositoryImpl) GetCartByCartId(cartId int) (*entity.Cart, error) {
+	var cart entity.Cart
+
+	query := r.db.
+		Where("id = (?)", cartId).
+		Find(&cart)
+		
+	err := query.Error
+	return &cart, err
+}
+
 func (r *CartRepositoryImpl) DeleteCart(username string) (error) {
 	var carts []entity.Cart
 
@@ -66,3 +80,23 @@ func (r *CartRepositoryImpl) DeleteCart(username string) (error) {
 	err := query.Error
 	return err
 }  
+
+
+func (r *CartRepositoryImpl) DeleteCartByCartId(cartId int) (error) {
+	var carts []entity.Cart
+
+	query := r.db.
+		Where("id = (?) AND is_ordered != (?)", cartId, true).
+		Delete(&carts)
+
+	err := query.Error
+	return err
+}
+
+func (r *CartRepositoryImpl) UpdateCartByCartId(cartId int, newCart *entity.Cart) (error) {
+	err := r.db.
+		Where("id = ?", cartId).
+		Updates(newCart).
+		Debug().Error
+	return err
+}

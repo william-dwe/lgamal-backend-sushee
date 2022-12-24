@@ -4,6 +4,7 @@ import (
 	"final-project-backend/entity"
 	"final-project-backend/errorlist"
 	"final-project-backend/handler/router_helper"
+	"strconv"
 
 	"github.com/gin-gonic/gin"
 )
@@ -38,6 +39,23 @@ func (h *Handler) ShowCart(c *gin.Context) {
 	router_helper.GenerateResponseMessage(c, t)
 }
 
+func (h *Handler) ShowCartById(c *gin.Context) {
+	username := c.GetString("username")
+	cartId, err := strconv.Atoi(c.Param("cartId"))
+	if err != nil {
+		router_helper.GenerateErrorMessage(c, errorlist.BadRequestError("wrong cartId format", "INVALID_INPUT"))
+		return
+	}
+
+	t, err := h.cartUsecase.GetCartByCartId(username, cartId)
+	if err != nil {
+		router_helper.GenerateErrorMessage(c, err)
+		return
+	}
+
+	router_helper.GenerateResponseMessage(c, t)
+}
+
 func (h *Handler) DeleteCart(c *gin.Context) {
 	username := c.GetString("username")
 
@@ -48,4 +66,45 @@ func (h *Handler) DeleteCart(c *gin.Context) {
 	}
 
 	router_helper.GenerateResponseMessage(c, "Cart has been cleared")
+}
+
+
+func (h *Handler) DeleteCartById(c *gin.Context) {
+	username := c.GetString("username")
+	cartId, err := strconv.Atoi(c.Param("cartId"))
+	if err != nil {
+		router_helper.GenerateErrorMessage(c, errorlist.BadRequestError("wrong cartId format", "INVALID_INPUT"))
+		return
+	}
+
+	err = h.cartUsecase.DeleteCartByCartId(username, cartId)
+	if err != nil {
+		router_helper.GenerateErrorMessage(c, err)
+		return
+	}
+
+	router_helper.GenerateResponseMessage(c, "Cart item has been deleted")
+}
+
+func (h *Handler) UpdateCartById(c *gin.Context) {
+	username := c.GetString("username")
+	cartId, err := strconv.Atoi(c.Param("cartId"))
+	if err != nil {
+		router_helper.GenerateErrorMessage(c, errorlist.BadRequestError("wrong cartId format", "INVALID_INPUT"))
+		return
+	}
+	var reqBody entity.CartEditDetailsReqBody
+	if err := c.BindJSON(&reqBody); err != nil {
+		router_helper.GenerateErrorMessage(c, errorlist.BadRequestError("should provide the new cart value", "INVALID_INPUT"))
+		return
+	}
+
+
+	cart, err := h.cartUsecase.UpdateCartByCartId(username, cartId, &reqBody)
+	if err != nil {
+		router_helper.GenerateErrorMessage(c, err)
+		return
+	}
+
+	router_helper.GenerateResponseMessage(c, cart)
 }

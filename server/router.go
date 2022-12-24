@@ -37,8 +37,11 @@ func CreateRouter(c RouterConfig) *gin.Engine {
 	user.POST("/users/me", h.UpdateUserProfile)
 
 	user.GET("/carts", h.ShowCart)
+	user.GET("/carts/:cartId", h.ShowCartById)
 	user.POST("/carts", h.AddCart)
+	user.POST("/carts/:cartId", h.UpdateCartById)
 	user.DELETE("/carts", h.DeleteCart)
+	user.DELETE("/carts/:cartId", h.DeleteCartById)
 
 	r.NoRoute(h.NotFoundHandler)
 

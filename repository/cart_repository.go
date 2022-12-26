@@ -2,7 +2,6 @@ package repository
 
 import (
 	"final-project-backend/entity"
-	"fmt"
 
 	"gorm.io/gorm"
 )
@@ -32,7 +31,6 @@ func NewCartRepository(c CartRepositoryConfig) CartRepository {
 
 func (r *CartRepositoryImpl) AddItemToCart(c *entity.Cart) (*entity.Cart, error) {
 	err := r.db.Create(&c).Error
-	fmt.Println("err:", err)
 	return c, err
 }
 
@@ -60,7 +58,7 @@ func (r *CartRepositoryImpl) GetCartByCartId(cartId int) (*entity.Cart, error) {
 
 	query := r.db.
 		Where("id = (?)", cartId).
-		Find(&cart)
+		First(&cart)
 		
 	err := query.Error
 	return &cart, err

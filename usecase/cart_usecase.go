@@ -58,7 +58,7 @@ func (u *cartUsecaseImpl) GetCart(username string) (*[]entity.Cart, error) {
 	if err != nil && !errors.Is(err, gorm.ErrRecordNotFound) {
 		return nil, errorlist.InternalServerError()
 	}
-	
+
 	return carts, nil
 }
 

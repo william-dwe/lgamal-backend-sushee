@@ -25,5 +25,4 @@ type CartReqBody struct {
 type CartEditDetailsReqBody struct {
 	Quantity int `json:"quantity,omitempty"`
 	MenuOption pgtype.JSON `json:"menu_option,omitempty"`
-
 }

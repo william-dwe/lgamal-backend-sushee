@@ -12,6 +12,7 @@ type RouterConfig struct {
 	UserUsecase        usecase.UserUsecase
 	MenuUsecase 	usecase.MenuUsecase
 	CartUsecase usecase.CartUsecase
+	OrderUsecase usecase.OrderUsecase
 }
 
 func CreateRouter(c RouterConfig) *gin.Engine {
@@ -22,6 +23,7 @@ func CreateRouter(c RouterConfig) *gin.Engine {
 		UserUsecase:        c.UserUsecase,
 		MenuUsecase: c.MenuUsecase,
 		CartUsecase: c.CartUsecase,
+		OrderUsecase: c.OrderUsecase,
 	})
 
 	v1 := r.Group("/v1")
@@ -42,6 +44,14 @@ func CreateRouter(c RouterConfig) *gin.Engine {
 	user.POST("/carts/:cartId", h.UpdateCartById)
 	user.DELETE("/carts", h.DeleteCart)
 	user.DELETE("/carts/:cartId", h.DeleteCartById)
+
+	user.GET("/orders", h.GetOrder)
+	user.POST("/orders", h.AddOrder)
+	user.GET("/orders/payment", h.GetPaymentOption)
+	user.GET("/orders/coupon", h.GetUserCouponByUsername)
+
+
+	// admin.GET("/orders/coupon", h.GetCoupon) for admin
 
 	r.NoRoute(h.NotFoundHandler)
 

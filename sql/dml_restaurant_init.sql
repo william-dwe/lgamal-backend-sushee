@@ -44,3 +44,7 @@ values
 
 insert into carts(user_id, promotion_id, menu_id, quantity, menu_option) 
 values (1, 1, null, 1, '{"size":"big"}');
+
+insert into payment_options(payment_name)
+values ('cash'), ('qris');
+

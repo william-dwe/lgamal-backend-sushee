@@ -156,8 +156,8 @@ create table if not exists orders (
 	order_date TIMESTAMP not null default CURRENT_TIMESTAMP,
 	coupon_id INT,
 	foreign key (coupon_id) references coupons(id),
-	payment_options_id INT,
-	foreign key (payment_options_id) references payment_options(id),
+	payment_option_id INT,
+	foreign key (payment_option_id) references payment_options(id),
 	created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
 	updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
 	deleted_at TIMESTAMP NULL
@@ -178,4 +178,16 @@ create table if not exists ordered_menus (
 	updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
 	deleted_at TIMESTAMP NULL
 );
-	
+
+create table if not exists reviews (
+	id SERIAL PRIMARY KEY,
+	review_description varchar,
+	rating numeric,
+	ordered_menu_id INT,
+	foreign key (ordered_menu_id) references ordered_menus(id),
+	menu_id INT,
+	foreign key (menu_id) references menus(id),
+	created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+	updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+	deleted_at TIMESTAMP NULL
+);

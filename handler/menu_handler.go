@@ -10,7 +10,7 @@ import (
 )
 
 func (h *Handler) ShowMenu(c *gin.Context) {
-	limit, err := strconv.Atoi(c.DefaultQuery("limit", "5"))
+	limit, err := strconv.Atoi(c.DefaultQuery("limit", "0"))
 	if err != nil {
 		router_helper.GenerateErrorMessage(c, errorlist.BadRequestError("something wrong with the request content", "INVALID_INPUT"))
 		return
@@ -52,7 +52,11 @@ func (h *Handler) ShowPromotion(c *gin.Context) {
 		return
 	}
 
-	router_helper.GenerateResponseMessage(c, t)
+	respBody := entity.PromotionResBody{
+		Promotions: *t,
+	}
+
+	router_helper.GenerateResponseMessage(c, respBody)
 }
 
 // todo add menu detail

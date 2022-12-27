@@ -30,7 +30,15 @@ func NewMenuUsecase(c MenuUsecaseConfig) MenuUsecase {
 
 
 func (u *menuUsecaseImpl) GetMenu(q entity.MenuQuery) (*[]entity.Menu, int, error) {
-	menus, rows, err := u.menuRepository.GetMenu(q)
+	rows, err := u.menuRepository.GetMenuCount(q)
+	if err != nil {
+		return nil, 0, errorlist.InternalServerError()
+	}
+
+	if q.Limit == 0 {
+		q.Limit = rows	
+	}
+	menus, err := u.menuRepository.GetMenu(q)
 	if errors.Is(err, gorm.ErrRecordNotFound) || len(*menus) == 0 {
 		return nil, 0, errorlist.BadRequestError("no menu found", "NO_MENU_FOUND")
 	}

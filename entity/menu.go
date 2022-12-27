@@ -46,3 +46,7 @@ type Promotion struct {
 	StartAt time.Time
 	expiredAt time.Time
 }
+
+type PromotionResBody struct {
+	Promotions []Promotion `json:"promotion"`
+}

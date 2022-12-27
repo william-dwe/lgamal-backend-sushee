@@ -10,7 +10,8 @@ import (
 )
 
 type MenuRepository interface {
-	GetMenu(entity.MenuQuery) (*[]entity.Menu, int, error)
+	GetMenu(entity.MenuQuery) (*[]entity.Menu, error)
+	GetMenuCount(q entity.MenuQuery) (int, error)
 	GetPromotionMenu() (*[]entity.Promotion, error)
 }
 
@@ -28,7 +29,24 @@ func NewMenuRepository(c MenuRepositoryConfig) MenuRepository {
 	}
 }
 
-func (r *MenuRepositoryImpl) GetMenu(q entity.MenuQuery) (*[]entity.Menu, int, error) {
+func (r *MenuRepositoryImpl) GetMenuCount(q entity.MenuQuery) (int, error) {
+	var rows int64
+
+	menuCategorySQ := r.db.
+		Select("id").
+		Where("category_name IN (?)", strings.Split(q.FilterByCategory, ",")).
+		Or("'' = ?", q.FilterByCategory).
+		Table("categories")
+	query := r.db.
+		Joins("menus").
+		Where("category_id IN (?)", menuCategorySQ).
+		Table("menus")
+	query.Count(&rows)
+	err := query.Error
+	return int(rows), err
+}
+
+func (r *MenuRepositoryImpl) GetMenu(q entity.MenuQuery) (*[]entity.Menu, error) {
 	var menus []entity.Menu
 
 	menuCategorySQ := r.db.
@@ -52,10 +70,8 @@ func (r *MenuRepositoryImpl) GetMenu(q entity.MenuQuery) (*[]entity.Menu, int, e
 		Limit(q.Limit).
 		Offset(q.Page*q.Limit - q.Limit).
 		Find(&menus)
-	var rows int64
-	menuSQ.Count(&rows)
 	err := query.Error
-	return &menus, int(rows), err
+	return &menus, err
 }
 
 func (r *MenuRepositoryImpl) GetPromotionMenu() (*[]entity.Promotion, error) {

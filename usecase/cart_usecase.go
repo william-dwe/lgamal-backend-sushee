@@ -22,17 +22,20 @@ type CartUsecase interface {
 type cartUsecaseImpl struct {
 	cartRepository   repository.CartRepository
 	userRepository repository.UserRepository
+	menuRepository repository.MenuRepository
 }
 
 type CartUsecaseConfig struct {
 	CartRepository   repository.CartRepository
 	UserRepository repository.UserRepository
+	MenuRepository repository.MenuRepository
 }
 
 func NewCartUsecase(c CartUsecaseConfig) CartUsecase {
 	return &cartUsecaseImpl{
 		cartRepository:   c.CartRepository,
 		userRepository: c.UserRepository,
+		menuRepository: c.MenuRepository,
 	}
 }
 
@@ -90,6 +93,16 @@ func (u *cartUsecaseImpl) AddCart(username string, c *entity.CartReqBody) (*enti
 		return nil, errorlist.InternalServerError()
 	}
 	
+	if c.PromotionId != nil {
+		c, err := u.menuRepository.ValidatePromoMenu(*c.MenuId, *c.PromotionId)
+		if err != nil && !errors.Is(err, gorm.ErrRecordNotFound) {
+				return nil, errorlist.InternalServerError()
+		}
+		if c == 0 {
+			return nil, errorlist.BadRequestError("promo is currently not available for the chosen menu", "INVALID_PROMO")
+		}
+	}
+
 	newCartItem := entity.Cart{
 		UserId: int(user.ID),
 		MenuId: c.MenuId,
@@ -112,7 +125,7 @@ func (u *cartUsecaseImpl) DeleteCart(username string) (error) {
 	if errors.Is(err, gorm.ErrRecordNotFound) {
 		return errorlist.BadRequestError("no cart found", "NO_CART_FOUND")
 	}
-	if err != nil && !errors.Is(err, gorm.ErrRecordNotFound) {
+	if err != nil {
 		return errorlist.InternalServerError()
 	}
 	
@@ -124,7 +137,7 @@ func (u *cartUsecaseImpl) DeleteCartByCartId(username string, cartId int) (error
 	if errors.Is(err, gorm.ErrRecordNotFound) {
 		return errorlist.BadRequestError("cart not found", "NO_CART_FOUND")
 	}
-	if err != nil && !errors.Is(err, gorm.ErrRecordNotFound) {
+	if err != nil {
 		return errorlist.InternalServerError()
 	}
 

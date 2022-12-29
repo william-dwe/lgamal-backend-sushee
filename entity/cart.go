@@ -9,6 +9,7 @@ type Cart struct {
 	gorm.Model
 	UserId int
 	MenuId *int
+	Menu Menu
 	PromotionId *int
 	Quantity int
 	MenuOption pgtype.JSON
@@ -25,4 +26,8 @@ type CartReqBody struct {
 type CartEditDetailsReqBody struct {
 	Quantity int `json:"quantity,omitempty"`
 	MenuOption pgtype.JSON `json:"menu_option,omitempty"`
+}
+
+type CartResBody struct {
+	Carts []Cart `json:"carts"`
 }

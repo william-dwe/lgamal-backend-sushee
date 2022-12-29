@@ -54,7 +54,7 @@ func (u *menuUsecaseImpl) GetMenu(q entity.MenuQuery) (*[]entity.Menu, int, erro
 func (u *menuUsecaseImpl) GetPromotion() (*[]entity.Promotion, error) {
 	menus, err := u.menuRepository.GetPromotionMenu()
 	if errors.Is(err, gorm.ErrRecordNotFound) || len(*menus) == 0 {
-		return nil, errorlist.BadRequestError("no menu found", "NO_MENU_FOUND")
+		return nil, errorlist.BadRequestError("no available promotion", "NO_MENU_FOUND")
 	}
 	if err != nil && !errors.Is(err, gorm.ErrRecordNotFound) {
 		return nil, errorlist.InternalServerError()

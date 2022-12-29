@@ -29,6 +29,8 @@ func NewCartRepository(c CartRepositoryConfig) CartRepository {
 	}
 }
 
+
+
 func (r *CartRepositoryImpl) AddItemToCart(c *entity.Cart) (*entity.Cart, error) {
 	err := r.db.Create(&c).Error
 	return c, err
@@ -45,6 +47,8 @@ func (r *CartRepositoryImpl) GetCartByUsername(username string) (*[]entity.Cart,
 		Where("is_ordered != (?)", true).
 		Table("carts")
 	query := r.db.
+		Model(&entity.Cart{}).
+		Preload("Menu").
 		Table("(?) as th", menuSubQuery).
 		Where("user_id = (?)", userSQ).
 		Find(&carts)

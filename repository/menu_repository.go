@@ -13,6 +13,7 @@ type MenuRepository interface {
 	GetMenu(entity.MenuQuery) (*[]entity.Menu, error)
 	GetMenuCount(q entity.MenuQuery) (int, error)
 	GetPromotionMenu() (*[]entity.Promotion, error)
+	ValidatePromoMenu(menuId, promoId int) (int, error)
 }
 
 type MenuRepositoryImpl struct {
@@ -77,7 +78,20 @@ func (r *MenuRepositoryImpl) GetMenu(q entity.MenuQuery) (*[]entity.Menu, error)
 func (r *MenuRepositoryImpl) GetPromotionMenu() (*[]entity.Promotion, error) {
 	var promotions []entity.Promotion
 	err := r.db.
+		Model(&entity.Promotion{}).
+		Preload("PromoMenus.Menu").
 		Where("? between started_at and expired_at", time.Now()).
 		Find(&promotions).Error
 	return &promotions, err
+}
+
+func (r *MenuRepositoryImpl) ValidatePromoMenu(menuId, promoId int) (int, error) {
+	var c int64
+	err := r.db.
+		Model(entity.PromoMenu{}).
+		Where("menu_id = ? AND promotion_id = ?", menuId, promoId).
+		Count(&c).
+		Table("promo_menus").
+		Error
+	return int(c), err
 }

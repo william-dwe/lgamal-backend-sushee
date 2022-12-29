@@ -34,6 +34,7 @@ func initRouter() *gin.Engine {
 	cartUsecase := usecase.NewCartUsecase(usecase.CartUsecaseConfig{
 		CartRepository:   cartRepo,
 		UserRepository:   userRepo,
+		MenuRepository: menuRepo,
 	})
 	orderUsecase := usecase.NewOrderUsecase(usecase.OrderUsecaseConfig{
 		OrderRepository:   orderRepo,

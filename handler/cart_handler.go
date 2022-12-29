@@ -36,7 +36,11 @@ func (h *Handler) ShowCart(c *gin.Context) {
 		return
 	}
 
-	router_helper.GenerateResponseMessage(c, t)
+	resBody := entity.CartResBody{
+		Carts: *t,
+	}
+
+	router_helper.GenerateResponseMessage(c, resBody)
 }
 
 func (h *Handler) ShowCartById(c *gin.Context) {

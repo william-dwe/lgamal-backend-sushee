@@ -107,6 +107,7 @@ CREATE TABLE IF NOT EXISTS promo_menus (
 	foreign key (promotion_id) references promotions(id),
 	menu_id INT,
 	foreign key (menu_id) references menus(id),
+	promotion_price numeric,
 	created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
 	updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
 	deleted_at TIMESTAMP NULL

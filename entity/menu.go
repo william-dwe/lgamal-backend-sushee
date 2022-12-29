@@ -36,6 +36,14 @@ type MenuCategory struct {
 	CategoryName string
 }
 
+type PromoMenu struct {
+	gorm.Model
+	PromotionId int
+	MenuId int
+	Menu Menu `gorm:"foreignKey:MenuId;references:ID"`
+	PromotionPrice float64
+}
+
 type Promotion struct {
 	gorm.Model
 	AdminId int
@@ -44,9 +52,10 @@ type Promotion struct {
 	PromotionPhoto string
 	DiscountRate float64
 	StartAt time.Time
-	expiredAt time.Time
+	ExpiredAt time.Time
+	PromoMenus []PromoMenu `gorm:"foreignKey:PromotionId;references:ID"`
 }
 
 type PromotionResBody struct {
-	Promotions []Promotion `json:"promotion"`
+	Promotions []Promotion `json:"promotions"`
 }

@@ -41,7 +41,7 @@ func NewCartUsecase(c CartUsecaseConfig) CartUsecase {
 
 func guardNullJSON(j pgtype.JSON) pgtype.JSON {
 	if j.Status == 0 {
-		return pgtype.JSON{Bytes:[]byte{34,34}, Status:2}
+		return pgtype.JSON{Bytes:[]byte{123,125}, Status:2}
 	}
 	return j
 }
@@ -195,10 +195,9 @@ func (u *cartUsecaseImpl) UpdateCartByCartId(username string, cartId int, reqBod
 		return nil, err
 	}
 	
-	
 	newCart := entity.Cart{
 		Quantity: reqBody.Quantity,
-		MenuOption: guardNullJSON(reqBody.MenuOption),
+		MenuOption: guardNullJSON(cart.MenuOption), // karena gabisa null --> jadi auto keupdate terus
 	}
 
 	err = u.cartRepository.UpdateCartByCartId(cartId, &newCart)

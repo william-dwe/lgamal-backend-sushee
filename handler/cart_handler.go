@@ -104,11 +104,11 @@ func (h *Handler) UpdateCartById(c *gin.Context) {
 	}
 
 
-	cart, err := h.cartUsecase.UpdateCartByCartId(username, cartId, &reqBody)
+	_, err = h.cartUsecase.UpdateCartByCartId(username, cartId, &reqBody)
 	if err != nil {
 		router_helper.GenerateErrorMessage(c, err)
 		return
 	}
 
-	router_helper.GenerateResponseMessage(c, cart)
+	router_helper.GenerateResponseMessage(c, "cart has been updated")
 }

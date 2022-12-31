@@ -98,7 +98,6 @@ func (r *CartRepositoryImpl) DeleteCart(username string) (error) {
 	return err
 }  
 
-
 func (r *CartRepositoryImpl) DeleteCartByCartId(cartId int) (error) {
 	var carts []entity.Cart
 

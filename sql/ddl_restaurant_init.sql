@@ -59,6 +59,7 @@ CREATE TABLE IF NOT EXISTS menus (
 	menu_photo varchar,
 	category_id INT,
 	foreign key (category_id) references categories(id),
+	customization json set default '{}',
 	created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
 	updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
 	deleted_at TIMESTAMP NULL
@@ -74,17 +75,6 @@ CREATE TABLE IF NOT EXISTS favorited_menus (
 	updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
 	deleted_at TIMESTAMP NULL
 );
-
-CREATE TABLE IF NOT EXISTS menu_customs (
-	id SERIAL primary key,
-	menu_id int,
-	foreign key (menu_id) references menus(id),
-	customization varchar,
-	created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
-	updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
-	deleted_at TIMESTAMP NULL
-);
-
 
 CREATE TABLE IF NOT EXISTS promotions (
 	id SERIAL PRIMARY KEY,

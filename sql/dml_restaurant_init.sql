@@ -30,7 +30,14 @@ values
 ('Lemon Tea', 0, 0, 12000, 'https://res.cloudinary.com/dgr6o89ym/image/upload/v1671771968/menu/drinks-lemon_tea_owmrxz.png', 3),
 ('Mint Tea', 0, 0, 12000, 'https://res.cloudinary.com/dgr6o89ym/image/upload/v1671771967/menu/drinks-mint_tea_mgwedf.png', 3);
 insert into favorited_menus (user_id, menu_id) values (1,1);
-insert into menu_customs(menu_id, customization) values (1, 'size:big/small'), (1,'extra sauce:yes/no'), (2,'size:big/small');
+
+update menus
+set customization = '{"title":"Size","type":"radio","options":["Small","Medium","Large"]}'
+where menu_name in ('Mint Tea', 'Lemon Tea');
+
+update menus
+set customization = '{"title":"Toppings","type":"checkbox","options":["Mayonaise","Wasabi","Katsuoboshi"]}'
+where menu_name = 'California Roll';
 
 insert into promotions(admin_id, name, description, promotion_photo, discount_rate, started_at, expired_at)
 values 

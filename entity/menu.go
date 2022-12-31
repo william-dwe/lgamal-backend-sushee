@@ -3,6 +3,7 @@ package entity
 import (
 	"time"
 
+	"github.com/jackc/pgtype"
 	"gorm.io/gorm"
 )
 
@@ -17,6 +18,7 @@ type Menu struct {
 	Price float64 `json:"price"`
 	MenuPhoto string `json:"menu_photo"`
 	CategoryId int `json:"category_id"`
+	Customization pgtype.JSON `json:"customization"`
 }
 
 type MenuQuery struct {

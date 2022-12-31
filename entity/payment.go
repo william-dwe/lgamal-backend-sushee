@@ -1,12 +1,21 @@
 package entity
 
 import (
+	"time"
+
 	"gorm.io/gorm"
 )
 
 type PaymentOption struct {
-	gorm.Model
-	PaymentName string
+	ID uint `json:"id"`
+	CreatedAt time.Time `json:"created_at"`
+	UpdatedAt time.Time `json:"updated_at"`
+	DeletedAt gorm.DeletedAt `json:"deleted_at"`
+	PaymentName string `json:"payment_name"`
+}
+
+type PaymentOptionResBody struct {
+	PaymentOptions []PaymentOption `json:"payment_options"`
 }
 
 func (PaymentOption) TableName() string {

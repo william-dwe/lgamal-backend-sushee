@@ -36,7 +36,7 @@ func (h *Handler) ShowCart(c *gin.Context) {
 		return
 	}
 
-	resBody := entity.CartResBody{
+	resBody := entity.CartsResBody{
 		Carts: *t,
 	}
 

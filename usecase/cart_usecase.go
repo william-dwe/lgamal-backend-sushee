@@ -13,7 +13,7 @@ import (
 type CartUsecase interface {
 	GetCart(username string) (*[]entity.Cart, error)
 	GetCartByCartId(username string, cartId int) (*entity.Cart, error)
-	AddCart(username string, c *entity.CartReqBody) (*entity.Cart, error)
+	AddCart(username string, c *entity.CartReqBody) (*entity.CartResBody, error)
 	DeleteCart(username string) (error)
 	DeleteCartByCartId(username string, cartId int) (error)
 	UpdateCartByCartId(username string, cartId int, updatePremises *entity.CartEditDetailsReqBody) (*entity.Cart, error)
@@ -55,9 +55,6 @@ func validateCartOwnership(cart *entity.Cart, user *entity.User) error {
 
 func (u *cartUsecaseImpl) GetCart(username string) (*[]entity.Cart, error) {
 	carts, err := u.cartRepository.GetCartByUsername(username)
-	if errors.Is(err, gorm.ErrRecordNotFound) || len(*carts) == 0 {
-		return nil, errorlist.BadRequestError("no cart found", "NO_CART_FOUND")
-	}
 	if err != nil && !errors.Is(err, gorm.ErrRecordNotFound) {
 		return nil, errorlist.InternalServerError()
 	}
@@ -87,22 +84,12 @@ func (u *cartUsecaseImpl) GetCartByCartId(username string, cartId int) (*entity.
 	return cart, nil
 }
 
-func (u *cartUsecaseImpl) AddCart(username string, c *entity.CartReqBody) (*entity.Cart, error) {
+func (u *cartUsecaseImpl) AddCart(username string, c *entity.CartReqBody) (*entity.CartResBody, error) {
 	user, err := u.userRepository.GetUserByEmailOrUsername(username)
 	if err != nil {
 		return nil, errorlist.InternalServerError()
 	}
 	
-	if c.PromotionId != nil {
-		c, err := u.menuRepository.ValidatePromoMenu(*c.MenuId, *c.PromotionId)
-		if err != nil && !errors.Is(err, gorm.ErrRecordNotFound) {
-				return nil, errorlist.InternalServerError()
-		}
-		if c == 0 {
-			return nil, errorlist.BadRequestError("promo is currently not available for the chosen menu", "INVALID_PROMO")
-		}
-	}
-
 	newCartItem := entity.Cart{
 		UserId: int(user.ID),
 		MenuId: c.MenuId,
@@ -111,12 +98,38 @@ func (u *cartUsecaseImpl) AddCart(username string, c *entity.CartReqBody) (*enti
 		MenuOption: guardNullJSON(c.MenuOption),
 	}
 
-	cart, err := u.cartRepository.AddItemToCart(&newCartItem)
+	if c.PromotionId != nil {
+		c, err := u.menuRepository.GetAndValidatePromoMenu(*c.MenuId, *c.PromotionId)
+		if errors.Is(err, gorm.ErrRecordNotFound) {
+			return nil, errorlist.BadRequestError("promo is currently not available for the chosen menu", "INVALID_PROMO")
+		}
+		if err != nil {
+				return nil, errorlist.InternalServerError()
+		}
+
+		newCartItem.PromotionPrice= &c.PromotionPrice
+	}
+
+	createdCart, err := u.cartRepository.AddItemToCart(&newCartItem)
 	if err != nil {
 		return nil, errorlist.InternalServerError()
 	}
-	
-	return cart, nil
+
+	cart := entity.CartResBody{
+		ID: createdCart.ID,
+		CreatedAt: createdCart.CreatedAt,
+		UpdatedAt: createdCart.UpdatedAt,
+		DeletedAt: createdCart.DeletedAt,
+		UserId: createdCart.UserId,
+		MenuId: createdCart.MenuId,
+		PromotionId: createdCart.PromotionId,
+		Quantity: createdCart.Quantity,
+		MenuOption: createdCart.MenuOption,
+		IsOrdered: createdCart.IsOrdered,
+		PromotionPrice: createdCart.PromotionPrice,
+	}
+
+	return &cart, nil
 }
 
 

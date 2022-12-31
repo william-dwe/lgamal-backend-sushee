@@ -7,13 +7,16 @@ import (
 )
 
 type Menu struct {
-	gorm.Model
-	MenuName string
-	AvgRating int
-	NumberOfFavorites int
-	Price float64
-	MenuPhoto string
-	CategoryId int
+	ID uint `json:"id"`
+	CreatedAt time.Time `json:"created_at"`
+	UpdatedAt time.Time `json:"updated_at"`
+	DeletedAt gorm.DeletedAt `json:"deleted_at"`
+	MenuName string `json:"menu_name"`
+	AvgRating int `json:"avg_rating"`
+	NumberOfFavorites int `json:"number_of_favorites"`
+	Price float64 `json:"price"`
+	MenuPhoto string `json:"menu_photo"`
+	CategoryId int `json:"category_id"`
 }
 
 type MenuQuery struct {
@@ -37,23 +40,29 @@ type MenuCategory struct {
 }
 
 type PromoMenu struct {
-	gorm.Model
-	PromotionId int
-	MenuId int
-	Menu Menu `gorm:"foreignKey:MenuId;references:ID"`
-	PromotionPrice float64
+	ID uint `json:"id"`
+	CreatedAt time.Time `json:"created_at"`
+	UpdatedAt time.Time `json:"updated_at"`
+	DeletedAt gorm.DeletedAt `json:"deleted_at"`
+	PromotionId int `json:"promotion_id"`
+	MenuId int `json:"menu_id"`
+	Menu Menu `json:"menu" gorm:"foreignKey:MenuId;references:ID"`
+	PromotionPrice float64 `json:"promotion_price"`
 }
 
 type Promotion struct {
-	gorm.Model
-	AdminId int
-	Name string
-	Description string
-	PromotionPhoto string
-	DiscountRate float64
-	StartAt time.Time
-	ExpiredAt time.Time
-	PromoMenus []PromoMenu `gorm:"foreignKey:PromotionId;references:ID"`
+	ID uint `json:"id"`
+	CreatedAt time.Time `json:"created_at"`
+	UpdatedAt time.Time `json:"updated_at"`
+	DeletedAt gorm.DeletedAt `json:"deleted_at"`
+	AdminId int `json:"admin_id"`
+	Name string `json:"name"`
+	Description string `json:"description"`
+	PromotionPhoto string `json:"promotion_photo"`
+	DiscountRate float64 `json:"discount_rate"`
+	StartAt time.Time `json:"start_at"`
+	ExpiredAt time.Time `json:"expired_at"`
+	PromoMenus []PromoMenu `json:"promo_menus" gorm:"foreignKey:PromotionId;references:ID"`
 }
 
 type PromotionResBody struct {

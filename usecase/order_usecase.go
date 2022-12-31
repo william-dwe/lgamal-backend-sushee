@@ -38,6 +38,17 @@ func NewOrderUsecase(c OrderUsecaseConfig) OrderUsecase {
 	}
 }
 
+func validateCartOwnershipAndAvailability(cart *entity.Cart, user *entity.User) error {
+	if cart.UserId != int(user.ID) {
+		return errorlist.UnauthorizedError()
+	} 
+	if cart.IsOrdered == true {
+		return errorlist.BadRequestError("the cart has been ordered before", "INVALID_CART")
+	} 
+
+	return nil
+}
+
 
 func (u *orderUsecaseImpl) GetPaymentOption() (*[]entity.PaymentOption, error) {
 	paymentOptions, err :=  u.orderRepository.GetPaymentOption()
@@ -77,11 +88,27 @@ func (u *orderUsecaseImpl) GetUserCouponByUsername(username string) (*[]entity.U
 
 
 func (u *orderUsecaseImpl) AddOrder(username string, reqBody *entity.OrderReqBody) (*entity.Order, error) {
+	if len(reqBody.CartIdList) == 0 {
+		return nil, errorlist.BadRequestError("Please order something", "INVALID_ORDER")
+	}
 	user, err := u.userRepository.GetUserByEmailOrUsername(username)
 	if err != nil {
 		return nil, errorlist.InternalServerError()
 	}
 
+	carts, err :=  u.cartRepository.GetCartByCartIds(reqBody.CartIdList)
+	if err != nil {
+		return nil, errorlist.InternalServerError()
+	}
+	if len(*carts) != len(reqBody.CartIdList) {
+		return nil, errorlist.BadRequestError("Some cart IDs are not found", "INVALID_CART_IDS")
+	}
+	for _, cart := range *carts {
+		err = validateCartOwnershipAndAvailability(&cart, user)
+		if err != nil {
+			return nil, err
+		}
+	}
 
 	newOrder := entity.Order{
 		UserId: int(user.ID),
@@ -109,12 +136,7 @@ func (u *orderUsecaseImpl) AddOrder(username string, reqBody *entity.OrderReqBod
 
 
 	var newOrderedMenus []entity.OrderedMenu
-	for _, c := range reqBody.CartIdList {
-		cart, err := u.cartRepository.GetCartByCartId(c)
-		if err != nil {
-			return nil, errorlist.BadRequestError("Cart IDs not found", "INVALID_CART_IDS")
-		}
-
+	for _, cart := range *carts {
 		o := entity.OrderedMenu{
 			OrderId: int(order.ID),
 			Quantity: cart.Quantity,
@@ -135,9 +157,17 @@ func (u *orderUsecaseImpl) AddOrder(username string, reqBody *entity.OrderReqBod
 		return nil, errorlist.InternalServerError()
 	}
 
+	
+	u.cartRepository.UpdateCartByCartIds(reqBody.CartIdList, &entity.Cart{
+		IsOrdered: true,
+	})
+
 	for _, id := range reqBody.CartIdList {
 		u.cartRepository.DeleteCartByCartId(id)
 	}
+
+
+	
 
 	// todo: delivery
 

@@ -10,9 +10,11 @@ type CartRepository interface {
 	AddItemToCart(c *entity.Cart) (*entity.Cart, error)
 	GetCartByUsername(username string) (*[]entity.Cart, error)
 	GetCartByCartId(cartId int) (*entity.Cart, error)
+	GetCartByCartIds(cartIds []int) (*[]entity.Cart, error)
 	DeleteCart(username string) (error)
 	DeleteCartByCartId(cartId int) (error)
 	UpdateCartByCartId(cartId int, updatePremises *entity.Cart) (error)
+	UpdateCartByCartIds(cartIds []int, updatePremises *entity.Cart) (error)
 }
 
 type CartRepositoryImpl struct {
@@ -32,7 +34,8 @@ func NewCartRepository(c CartRepositoryConfig) CartRepository {
 
 
 func (r *CartRepositoryImpl) AddItemToCart(c *entity.Cart) (*entity.Cart, error) {
-	err := r.db.Create(&c).Error
+	err := r.db.
+		Create(&c).Error
 	return c, err
 }
 
@@ -51,6 +54,7 @@ func (r *CartRepositoryImpl) GetCartByUsername(username string) (*[]entity.Cart,
 		Preload("Menu").
 		Table("(?) as th", menuSubQuery).
 		Where("user_id = (?)", userSQ).
+		Order("created_at desc").
 		Find(&carts)
 		
 	err := query.Error
@@ -63,6 +67,17 @@ func (r *CartRepositoryImpl) GetCartByCartId(cartId int) (*entity.Cart, error) {
 	query := r.db.
 		Where("id = (?)", cartId).
 		First(&cart)
+		
+	err := query.Error
+	return &cart, err
+}
+
+func (r *CartRepositoryImpl) GetCartByCartIds(cartIds []int) (*[]entity.Cart, error) {
+	var cart []entity.Cart
+
+	query := r.db.
+		Where("id in (?)", cartIds).
+		Find(&cart)
 		
 	err := query.Error
 	return &cart, err
@@ -98,6 +113,14 @@ func (r *CartRepositoryImpl) DeleteCartByCartId(cartId int) (error) {
 func (r *CartRepositoryImpl) UpdateCartByCartId(cartId int, newCart *entity.Cart) (error) {
 	err := r.db.
 		Where("id = ?", cartId).
+		Updates(newCart).
+		Debug().Error
+	return err
+}
+
+func (r *CartRepositoryImpl) UpdateCartByCartIds(cartIds []int, newCart *entity.Cart) (error) {
+	err := r.db.
+		Where("id in (?)", cartIds).
 		Updates(newCart).
 		Debug().Error
 	return err

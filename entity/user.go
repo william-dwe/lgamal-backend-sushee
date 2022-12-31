@@ -26,7 +26,7 @@ type UserLoginReqBody struct {
 }
 
 type UserLoginResBody struct {
-	AccessToken string `json:"accessToken"`
+	AccessToken string `json:"access_token"`
 }
 
 type UserRegisterReqBody struct {
@@ -50,13 +50,13 @@ type UserRegisterResBody struct {
 }
 
 type UserContext struct {
-	Username string
-	FullName  string
-	Email     string
-	Phone string
-	ProfilePicture string
-	PlayAttempt int
-	RoleId int
+	Username string `json:"username"`
+	FullName  string `json:"full_name"`
+	Email     string `json:"email"`
+	Phone string `json:"phone"`
+	ProfilePicture string `json:"profile_picture"`
+	PlayAttempt int `json:"play_attempt"`
+	RoleId int `json:"role_id"`
 }
 
 type UserEditDetailsReqBody struct {

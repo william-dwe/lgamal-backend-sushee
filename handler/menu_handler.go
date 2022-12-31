@@ -58,5 +58,3 @@ func (h *Handler) ShowPromotion(c *gin.Context) {
 
 	router_helper.GenerateResponseMessage(c, respBody)
 }
-
-// todo add menu detail

@@ -8,21 +8,27 @@ import (
 )
 
 type Order struct {
-	gorm.Model
-	UserId int
-	OrderDate time.Time
-	CouponId *int
-	PaymentOptionId int
-	OrderedMenus []OrderedMenu
+	ID uint `json:"id"`
+	CreatedAt time.Time `json:"created_at"`
+	UpdatedAt time.Time `json:"updated_at"`
+	DeletedAt gorm.DeletedAt `json:"deleted_at"`
+	UserId int `json:"user_id"`
+	OrderDate time.Time `json:"order_date"`
+	CouponId *int `json:"coupon_id"`
+	PaymentOptionId int `json:"payment_option_id"`
+	OrderedMenus []OrderedMenu `json:"ordered_menus"`
 }
 
 type OrderedMenu struct {
-	gorm.Model
-	OrderId int
-	MenuId *int
-	PromotionId *int
-	Quantity int
-	MenuOption pgtype.JSON
+	ID uint `json:"id"`
+	CreatedAt time.Time `json:"created_at"`
+	UpdatedAt time.Time `json:"updated_at"`
+	DeletedAt gorm.DeletedAt `json:"deleted_at"`
+	OrderId int `json:"order_id"`
+	MenuId *int `json:"menu_id"`
+	PromotionId *int `json:"promotion_id"`
+	Quantity int `json:"quantity"`
+	MenuOption pgtype.JSON `json:"menu_option"`
 }
 
 type OrderReqBody struct {
@@ -32,7 +38,10 @@ type OrderReqBody struct {
 }
 
 type DeliveryOrder struct {
-	gorm.Model
-	OrderId int
-	DeliveredAt time.Time
+	ID uint `json:"id"`
+	CreatedAt time.Time `json:"created_at"`
+	UpdatedAt time.Time `json:"updated_at"`
+	DeletedAt gorm.DeletedAt `json:"deleted_at"`
+	OrderId int `json:"order_id"`
+	DeliveredAt time.Time `json:"delivered_at"`
 }

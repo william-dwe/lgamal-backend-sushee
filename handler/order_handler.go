@@ -14,7 +14,12 @@ func (h *Handler) GetPaymentOption(c *gin.Context) {
 		router_helper.GenerateErrorMessage(c, err)
 		return
 	}
-	router_helper.GenerateResponseMessage(c, &paymentOptions)
+
+	resBody := entity.PaymentOptionResBody{
+		PaymentOptions: *paymentOptions,
+	}
+
+	router_helper.GenerateResponseMessage(c, &resBody)
 }
 
 
@@ -47,6 +52,7 @@ func (h *Handler) AddOrder(c *gin.Context) {
 		router_helper.GenerateErrorMessage(c, errorlist.BadRequestError("something wrong with the request content", "INPUT_INCOMPLETE"))
 		return
 	}
+
 	order, err := h.orderUsecase.AddOrder(username, &reqBody)
 	if err != nil {
 		router_helper.GenerateErrorMessage(c, err)

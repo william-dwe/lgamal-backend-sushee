@@ -13,6 +13,7 @@ type RouterConfig struct {
 	MenuUsecase 	usecase.MenuUsecase
 	CartUsecase usecase.CartUsecase
 	OrderUsecase usecase.OrderUsecase
+	CouponUsecase usecase.CouponUsecase
 }
 
 func CreateRouter(c RouterConfig) *gin.Engine {
@@ -24,6 +25,7 @@ func CreateRouter(c RouterConfig) *gin.Engine {
 		MenuUsecase: c.MenuUsecase,
 		CartUsecase: c.CartUsecase,
 		OrderUsecase: c.OrderUsecase,
+		CouponUsecase: c.CouponUsecase,
 	})
 
 	v1 := r.Group("/v1")
@@ -50,10 +52,14 @@ func CreateRouter(c RouterConfig) *gin.Engine {
 	user.GET("/orders/payment", h.GetPaymentOption)
 	user.GET("/orders/coupon", h.GetUserCouponByUsername)
 
+	admin := v1.Group("")
+	admin.Use(middleware.Authorize)
+	admin.POST("/coupons", h.AddCoupon)
+	admin.GET("/coupons", h.GetCoupon)
+	admin.POST("/coupons/:couponId", h.UpdateCoupon)
+	admin.DELETE("/coupons/:couponId", h.DeleteCoupon)
 
-	// admin.GET("/orders/coupon", h.GetCoupon) for admin
 
 	r.NoRoute(h.NotFoundHandler)
-
 	return r
 }

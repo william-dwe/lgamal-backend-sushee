@@ -13,6 +13,7 @@ type Handler struct {
 	menuUsecase 		usecase.MenuUsecase
 	cartUsecase	usecase.CartUsecase
 	orderUsecase usecase.OrderUsecase
+	couponUsecase usecase.CouponUsecase
 }
 
 type HandlerConfig struct {
@@ -20,6 +21,7 @@ type HandlerConfig struct {
 	MenuUsecase        usecase.MenuUsecase
 	CartUsecase usecase.CartUsecase
 	OrderUsecase usecase.OrderUsecase
+	CouponUsecase usecase.CouponUsecase
 }
 
 func New(c HandlerConfig) *Handler {
@@ -28,6 +30,7 @@ func New(c HandlerConfig) *Handler {
 		menuUsecase: 	c.MenuUsecase,
 		cartUsecase: c.CartUsecase,
 		orderUsecase: c.OrderUsecase,
+		couponUsecase: c.CouponUsecase,
 	}
 }
 

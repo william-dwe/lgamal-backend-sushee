@@ -12,8 +12,6 @@ import (
 
 type OrderUsecase interface {
 	GetPaymentOption() (*[]entity.PaymentOption, error)
-	GetCoupon() (*[]entity.Coupon, error)
-	GetUserCouponByUsername(username string) (*[]entity.UserCoupon, error)
 	AddOrder(username string, reqBody *entity.OrderReqBody) (*entity.Order, error)
 	GetOrderHistory(username string) (*[]entity.Order, error)
 }
@@ -22,12 +20,15 @@ type orderUsecaseImpl struct {
 	orderRepository   repository.OrderRepository
 	userRepository repository.UserRepository
 	cartRepository repository.CartRepository
+	couponRepository repository.CouponRepository
 }
 
 type OrderUsecaseConfig struct {
 	OrderRepository   repository.OrderRepository
 	UserRepository repository.UserRepository
 	CartRepository repository.CartRepository
+	CouponRepository repository.CouponRepository
+
 }
 
 func NewOrderUsecase(c OrderUsecaseConfig) OrderUsecase {
@@ -35,6 +36,7 @@ func NewOrderUsecase(c OrderUsecaseConfig) OrderUsecase {
 		orderRepository:   c.OrderRepository,
 		userRepository: c.UserRepository,
 		cartRepository: c.CartRepository,
+		couponRepository: c.CouponRepository,
 	}
 }
 
@@ -42,7 +44,7 @@ func validateCartOwnershipAndAvailability(cart *entity.Cart, user *entity.User) 
 	if cart.UserId != int(user.ID) {
 		return errorlist.UnauthorizedError()
 	} 
-	if cart.IsOrdered == true {
+	if cart.IsOrdered {
 		return errorlist.BadRequestError("the cart has been ordered before", "INVALID_CART")
 	} 
 
@@ -58,34 +60,6 @@ func (u *orderUsecaseImpl) GetPaymentOption() (*[]entity.PaymentOption, error) {
 	
 	return paymentOptions, nil
 }
-
-
-func (u *orderUsecaseImpl) GetCoupon() (*[]entity.Coupon, error) {
-	coupons, err :=  u.orderRepository.GetCoupon()
-	if errors.Is(err, gorm.ErrRecordNotFound) {
-		return nil, errorlist.BadRequestError("no coupon available", "NO_COUPON_EXIST")
-	}
-	if err != nil {
-		return nil, errorlist.InternalServerError()
-	}
-	
-	return coupons, nil
-}
-
-
-func (u *orderUsecaseImpl) GetUserCouponByUsername(username string) (*[]entity.UserCoupon, error) {
-	userCoupons, r, err :=  u.orderRepository.GetUserCouponByUsername(username)
-	if errors.Is(err, gorm.ErrRecordNotFound) || r == 0 {
-		return nil, errorlist.BadRequestError("no coupon available", "NO_COUPON_EXIST")
-	}
-	if err != nil {
-		return nil, errorlist.InternalServerError()
-	}
-	
-	return userCoupons, nil
-}
-
-
 
 func (u *orderUsecaseImpl) AddOrder(username string, reqBody *entity.OrderReqBody) (*entity.Order, error) {
 	if len(reqBody.CartIdList) == 0 {
@@ -108,6 +82,7 @@ func (u *orderUsecaseImpl) AddOrder(username string, reqBody *entity.OrderReqBod
 		if err != nil {
 			return nil, err
 		}
+		// todo: calculate total price nebeng loop dsni
 	}
 
 	newOrder := entity.Order{
@@ -117,16 +92,18 @@ func (u *orderUsecaseImpl) AddOrder(username string, reqBody *entity.OrderReqBod
 	}
 
 	if reqBody.CouponCode != "" {
-		coupon, r, err := u.orderRepository.GetUserCouponByCouponCode(int(user.ID), reqBody.CouponCode)
+		coupon, r, err := u.couponRepository.GetUserCouponByCouponCode(int(user.ID), reqBody.CouponCode)
 		if errors.Is(err, gorm.ErrRecordNotFound) || r == 0{
 			return nil, errorlist.BadRequestError("coupon code invalid", "INVALID_COUPON_CODE")
 		}
 		if err != nil {
 			return nil, errorlist.InternalServerError()
 		}
+		// todo: add column discount rate on user coupon
 		couponId := int(coupon.ID) 
 		newOrder.CouponId = &couponId
 	}
+	// todo: total price dsni, dengan extra discount multiplier from coupons as well
 
 	order, err := u.orderRepository.AddOrder(&newOrder)
 

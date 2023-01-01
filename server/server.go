@@ -23,6 +23,9 @@ func initRouter() *gin.Engine {
 	orderRepo := repository.NewOrderRepository(repository.OrderRepositoryConfig{
 		DB: db.Get(),
 	})
+	couponRepo := repository.NewCouponRepository(repository.CouponRepositoryConfig{
+		DB: db.Get(),
+	})
 	
 
 	userUsecase := usecase.NewUserUsecase(usecase.UserUsecaseConfig{
@@ -41,6 +44,10 @@ func initRouter() *gin.Engine {
 		UserRepository: userRepo,
 		CartRepository: cartRepo,
 	})
+	couponUsecase := usecase.NewCouponUsecase(usecase.CouponUsecaseConfig{
+		CouponRepository: couponRepo,
+		UserRepository: userRepo,
+	})
 
 
 	r := CreateRouter(RouterConfig{
@@ -48,6 +55,7 @@ func initRouter() *gin.Engine {
 		MenuUsecase: 		menuUsecase,
 		CartUsecase: cartUsecase,
 		OrderUsecase: orderUsecase,
+		CouponUsecase: couponUsecase,
 	})
 	return r
 }

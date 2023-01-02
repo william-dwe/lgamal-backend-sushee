@@ -73,6 +73,37 @@ func (h *Handler) DeleteCoupon(c *gin.Context) {
 	router_helper.GenerateResponseMessage(c, coupons)
 }
 
+
+func (h *Handler) AddUserCoupon(c *gin.Context) {
+	var reqBody entity.UserCouponAddReqBody
+	if err := c.BindJSON(&reqBody); err != nil {
+		router_helper.GenerateErrorMessage(c, errorlist.BadRequestError("something wrong with the request content", "INPUT_INCOMPLETE"))
+		return
+	}
+
+	
+
+	// todo: input userid & couponid; body json?
+	// logic: check coupon avial -> create usercoupon -> deduct coupon slot
+
+	// what's next?
+	// 1. test to integrate coupon with order
+	// 2. create coupon component at profile & cart
+	// 3. trx history + review
+	// 4. favorited menu
+	// CRUD TIME ADMIN!!!!
+	// UT
+
+	// coupons, err := h.couponUsecase.GetUserCouponByUsername(username)
+	// if err != nil {
+	// 	router_helper.GenerateErrorMessage(c, err)
+	// 	return
+	// }
+	// router_helper.GenerateResponseMessage(c, coupons)
+}
+
+
+
 func (h *Handler) GetUserCouponByUsername(c *gin.Context) {
 	username := c.GetString("username")
 

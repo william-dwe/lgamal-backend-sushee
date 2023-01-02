@@ -35,7 +35,6 @@ func Connect() (err error) {
 		c.DBName,
 		c.Port,
 	)
-	fmt.Println(dsn)
 	db, err = gorm.Open(postgres.Open(dsn), &gorm.Config{
 		Logger: getLogger(),
 	})

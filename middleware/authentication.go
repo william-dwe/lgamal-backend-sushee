@@ -1,7 +1,6 @@
 package middleware
 
 import (
-	"fmt"
 	"strings"
 
 	"final-project-backend/config"
@@ -13,7 +12,7 @@ import (
 	"github.com/golang-jwt/jwt/v4"
 )
 
-func Authorize(c *gin.Context) {
+func Authenticate(c *gin.Context) {
 	conf := config.Config.AuthConfig
 	if conf.IsTesting != "false" {
 		return
@@ -39,5 +38,5 @@ func Authorize(c *gin.Context) {
 		return
 	}
 	c.Set("username", claims["username"])
-	fmt.Println("loggedin user: ", claims["username"])
+	c.Set("role", claims["role"])
 }

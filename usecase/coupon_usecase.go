@@ -44,7 +44,7 @@ func (u *couponUsecaseImpl) AddCoupon(username string, reqBody *entity.CouponAdd
 	newCoupon := entity.Coupon {
 		AdminId: int(admin.ID),
 		Description: reqBody.Description,
-		CouponDiscountAmount: reqBody.CouponDiscountAmount,
+		DiscountAmount: reqBody.DiscountAmount,
 		QuotaInitial: reqBody.QuotaInitial,
 		QuotaLeft: reqBody.QuotaLeft,
 	}
@@ -78,7 +78,7 @@ func (u *couponUsecaseImpl) UpdateCoupon(username string, couponId int, reqBody 
 	newCoupon := entity.Coupon{
 		AdminId: int(admin.ID),
 		Description: reqBody.Description,
-		CouponDiscountAmount: reqBody.CouponDiscountAmount,
+		DiscountAmount: reqBody.DiscountAmount,
 		QuotaInitial: reqBody.QuotaInitial,
 		QuotaLeft: reqBody.QuotaLeft,
 	}

@@ -17,6 +17,7 @@ type UserRepository interface {
 	AddNewUserSession(s *entity.Session) (*entity.Session, error)
 	GetUserSessionByRefreshToken(t string) (*entity.Session, error) 
 	UpdateUserDetailsByUsername(username string, updatePremises *entity.User) error
+	GetDetailRole(roleId int) (*entity.Role, error)
 }
 
 type UserRepositoryImpl struct {
@@ -87,4 +88,13 @@ func (r *UserRepositoryImpl) UpdateUserDetailsByUsername(username string, newUse
 		Updates(newUser).
 		Debug().Error
 	return err
+}
+
+func (r *UserRepositoryImpl) GetDetailRole(roleId int) (*entity.Role, error) {
+	var role entity.Role
+	err := r.db.
+		Where("id = ?", roleId).
+		First(&role).
+		Error
+	return &role, err
 }

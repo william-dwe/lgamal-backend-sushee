@@ -15,6 +15,7 @@ type CartRepository interface {
 	DeleteCartByCartId(cartId int) (error)
 	UpdateCartByCartId(cartId int, updatePremises *entity.Cart) (error)
 	UpdateCartByCartIds(cartIds []int, updatePremises *entity.Cart) (error)
+	GetCartTotalPriceByCartIds(cartIds []int) (float64, error) 
 }
 
 type CartRepositoryImpl struct {
@@ -30,8 +31,6 @@ func NewCartRepository(c CartRepositoryConfig) CartRepository {
 		db: c.DB,
 	}
 }
-
-
 
 func (r *CartRepositoryImpl) AddItemToCart(c *entity.Cart) (*entity.Cart, error) {
 	err := r.db.
@@ -123,4 +122,21 @@ func (r *CartRepositoryImpl) UpdateCartByCartIds(cartIds []int, newCart *entity.
 		Updates(newCart).
 		Debug().Error
 	return err
+}
+
+func (r *CartRepositoryImpl) GetCartTotalPriceByCartIds(cartIds []int) (float64, error) {
+	var result float64
+	sq := r.db.
+		Table("carts").
+		Select("COALESCE(carts.promotion_price, menus.price)*carts.quantity as cart_total_price").
+		Where("carts.id in (?)", cartIds).
+		Joins("JOIN menus on carts.menu_id = menus.id")
+
+	err := r.db.
+		Table("(?) as sq_cart_prices", sq).
+		Select("sum(cart_total_price) as total_price").
+		Scan(&result).
+		Error
+	
+	return result, err
 }

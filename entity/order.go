@@ -17,6 +17,9 @@ type Order struct {
 	CouponId *int `json:"coupon_id"`
 	PaymentOptionId int `json:"payment_option_id"`
 	OrderedMenus []OrderedMenu `json:"ordered_menus"`
+	GrossAmount float64 `json:"gross_amount"` 
+	DiscountAmount float64 `json:"discount_amount"`
+	NetAmount float64 `json:"net_amount"`
 }
 
 type OrderedMenu struct {

@@ -132,13 +132,27 @@ create table if not exists coupons (
 	admin_id INT,
 	foreign key (admin_id) references users(id),
 	description VARCHAR,
-	coupon_discount_amount numeric,
+	discount_amount numeric,
 	quota_initial numeric,
 	quota_left numeric,
 	created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
 	updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
 	deleted_at TIMESTAMP NULL
 )
+
+create table if not exists user_coupons (
+	id SERIAL primary key, 
+	user_id INT,
+	foreign key (user_id) references users(id),	
+	coupon_id INT,
+	foreign key (coupon_id) references coupons(id),
+	coupon_code VARCHAR,
+	discount_amount numeric,
+	created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+	updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+	deleted_at TIMESTAMP NULL
+);
+
 
 create table if not exists orders (
 	id SERIAL PRIMARY KEY,
@@ -149,6 +163,9 @@ create table if not exists orders (
 	foreign key (coupon_id) references coupons(id),
 	payment_option_id INT,
 	foreign key (payment_option_id) references payment_options(id),
+	gross_amount numeric,
+	discount_amount numeric,
+	net_amount numeric,
 	created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
 	updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
 	deleted_at TIMESTAMP NULL

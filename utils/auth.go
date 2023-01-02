@@ -13,7 +13,7 @@ import (
 
 type AuthUtil interface {
 	GenerateRefreshToken() (string, error)
-	GenerateAccessToken(username string) (string, error)
+	GenerateAccessToken(username string, role string) (string, error)
 	ValidateToken(encodedToken, signSecret string) (*jwt.Token, error)
 	ComparePassword(hashedPwd string, inputPwd string) bool
 }
@@ -27,13 +27,15 @@ func NewAuthUtil() AuthUtil {
 var c = config.Config.AuthConfig
 type customAccessTokenClaims struct {
 	Username string `json:"username"`
+	Role string `json:"role"`
 	jwt.RegisteredClaims
 }
 
-func (a *authUtilImpl) GenerateAccessToken(username string) (string, error) {
+func (a *authUtilImpl) GenerateAccessToken(username string, role string) (string, error) {
 	expirationLimit, _ := strconv.ParseInt(c.TimeLimitAccessToken, 10, 64)
 	claims := &customAccessTokenClaims{
 		username,
+		role,
 		jwt.RegisteredClaims{
 			ExpiresAt: jwt.NewNumericDate(time.Now().Add(time.Second * time.Duration(expirationLimit))),
 			IssuedAt:  jwt.NewNumericDate(time.Now()),

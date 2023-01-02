@@ -20,6 +20,7 @@ type UserUsecase interface {
 	Refresh(string) (*entity.UserLoginResBody, error)
 	GetDetailUserByUsername(accessToken string) (*entity.UserContext, error)
 	UpdateUserDetailsByUsername(username string, updatePremises entity.UserEditDetailsReqBody) (*entity.UserContext, error)
+	GetDetailRole(roleId int) (*entity.Role, error)
 }
 
 type userUsecaseImpl struct {
@@ -107,12 +108,17 @@ func (u *userUsecaseImpl) Login(identifier, password string) (*entity.UserLoginR
 		return nil, "", err
 	}
 
+	role, err := u.userRepository.GetDetailRole(user.RoleId)
+	if err != nil {
+		return nil, "", err
+	}
+
 	a := utils.NewAuthUtil()
 	if !a.ComparePassword(user.Password, password) {
 		return nil, "", errorlist.UnauthorizedError()
 	}
 
-	accessTokenStr, err := a.GenerateAccessToken(user.Username)
+	accessTokenStr, err := a.GenerateAccessToken(user.Username, role.RoleName)
 	if err != nil {
 		return nil, "", err
 	}
@@ -158,7 +164,12 @@ func (u *userUsecaseImpl) Refresh(refreshToken string) (*entity.UserLoginResBody
 		return nil, err
 	}
 
-	accessTokenStr, err := a.GenerateAccessToken(user.Username)
+	role, err := u.userRepository.GetDetailRole(user.RoleId)
+	if err != nil {
+		return nil, err
+	}
+
+	accessTokenStr, err := a.GenerateAccessToken(user.Username, role.RoleName)
 	if err != nil {
 		return nil, err
 	}
@@ -250,4 +261,12 @@ func (u *userUsecaseImpl) UpdateUserDetailsByUsername(username string, reqBody e
 		RoleId: user.RoleId,
 	}
 	return &userContext, err
+}
+
+func (u *userUsecaseImpl) GetDetailRole(roleId int) (*entity.Role, error){
+	role, err := u.userRepository.GetDetailRole(roleId)
+	if err != nil {
+		return nil, errorlist.InternalServerError()
+	}
+	return role, nil
 }

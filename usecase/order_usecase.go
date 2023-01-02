@@ -82,7 +82,6 @@ func (u *orderUsecaseImpl) AddOrder(username string, reqBody *entity.OrderReqBod
 		if err != nil {
 			return nil, err
 		}
-		// todo: calculate total price nebeng loop dsni
 	}
 
 	newOrder := entity.Order{
@@ -99,11 +98,17 @@ func (u *orderUsecaseImpl) AddOrder(username string, reqBody *entity.OrderReqBod
 		if err != nil {
 			return nil, errorlist.InternalServerError()
 		}
-		// todo: add column discount rate on user coupon
 		couponId := int(coupon.ID) 
 		newOrder.CouponId = &couponId
+		newOrder.DiscountAmount = coupon.DiscountAmount
 	}
-	// todo: total price dsni, dengan extra discount multiplier from coupons as well
+	
+	totalPrice, err :=  u.cartRepository.GetCartTotalPriceByCartIds(reqBody.CartIdList)
+	if err != nil {
+		return nil, err
+	}
+	newOrder.GrossAmount = totalPrice
+	newOrder.NetAmount = newOrder.GrossAmount-newOrder.DiscountAmount
 
 	order, err := u.orderRepository.AddOrder(&newOrder)
 

@@ -47,3 +47,10 @@ func UnauthorizedError() AppError {
 	}
 }
 
+func ForbiddenError() AppError {
+	return AppError{
+		Code:       "FORBIDDEN",
+		Message:    "You don't have permission to access",
+		StatusCode: http.StatusForbidden,
+	}
+}

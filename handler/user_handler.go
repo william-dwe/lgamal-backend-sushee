@@ -119,3 +119,45 @@ func (h *Handler) UpdateUserProfile(c *gin.Context) {
 
 	router_helper.GenerateResponseMessage(c, userInfo)
 }
+
+func (h *Handler) AuthenticateRole(c *gin.Context) {
+	username := c.GetString("username")
+	roleFromToken := c.GetString("role")
+
+	user, err := h.userUsecase.GetDetailUserByUsername(username)
+	if err != nil {
+		router_helper.GenerateErrorMessage(c, err)
+		return
+	}
+
+	roleFromDb, err := h.userUsecase.GetDetailRole(user.RoleId)
+	if err != nil {
+		router_helper.GenerateErrorMessage(c, err)
+		return
+	}
+
+	if roleFromToken != roleFromDb.RoleName {
+		router_helper.GenerateErrorMessage(c, errorlist.UnauthorizedError())
+		return
+	}
+
+	c.Next()
+}
+
+func (h *Handler) UserAuthorization (c *gin.Context) {
+	role := c.GetString("role")
+	if role != "user" {
+		router_helper.GenerateErrorMessage(c, errorlist.ForbiddenError())
+		return
+	}
+	c.Next()
+}
+
+func (h *Handler) AdminAuthorization (c *gin.Context) {
+	role := c.GetString("role")
+	if role != "admin" {
+		router_helper.GenerateErrorMessage(c, errorlist.ForbiddenError())
+		return
+	}
+	c.Next()
+}

@@ -35,8 +35,10 @@ func CreateRouter(c RouterConfig) *gin.Engine {
 	v1.POST("/register", h.Register)
 	v1.GET("/refresh", h.Refresh)
 
+	v1.Use(middleware.Authenticate)
+	v1.Use(h.AuthenticateRole)
 	user := v1.Group("")
-	user.Use(middleware.Authorize)
+	user.Use(h.UserAuthorization)
 	user.GET("/users/me", h.ShowUserDetail)
 	user.POST("/users/me", h.UpdateUserProfile)
 
@@ -53,12 +55,11 @@ func CreateRouter(c RouterConfig) *gin.Engine {
 	user.GET("/orders/coupon", h.GetUserCouponByUsername)
 
 	admin := v1.Group("")
-	admin.Use(middleware.Authorize)
+	admin.Use(h.AdminAuthorization)
 	admin.POST("/coupons", h.AddCoupon)
 	admin.GET("/coupons", h.GetCoupon)
 	admin.POST("/coupons/:couponId", h.UpdateCoupon)
 	admin.DELETE("/coupons/:couponId", h.DeleteCoupon)
-
 
 	r.NoRoute(h.NotFoundHandler)
 	return r

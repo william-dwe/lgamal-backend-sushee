@@ -32,6 +32,10 @@ type CouponEditReqBody struct {
 	QuotaLeft int `json:"quota_left,omitempty"`
 }
 
+type CouponResBody struct {
+	Coupons []Coupon `json:"coupons"`
+}
+
 type UserCoupon struct {
 	ID uint `json:"id"`
 	CreatedAt time.Time `json:"created_at"`
@@ -46,4 +50,8 @@ type UserCoupon struct {
 type UserCouponAddReqBody struct {
 	UserId int `json:"user_id"`
 	CouponId int `json:"coupon_id"`
+}
+
+type UserCouponResBody struct {
+	UserCoupons []UserCoupon `json:"user_coupons"`
 }

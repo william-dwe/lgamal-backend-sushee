@@ -12,7 +12,6 @@ import (
 
 type CartUsecase interface {
 	GetCart(username string) (*[]entity.Cart, error)
-	GetCartByCartId(username string, cartId int) (*entity.Cart, error)
 	AddCart(username string, c *entity.CartReqBody) (*entity.CartResBody, error)
 	DeleteCart(username string) (error)
 	DeleteCartByCartId(username string, cartId int) (error)
@@ -60,28 +59,6 @@ func (u *cartUsecaseImpl) GetCart(username string) (*[]entity.Cart, error) {
 	}
 
 	return carts, nil
-}
-
-func (u *cartUsecaseImpl) GetCartByCartId(username string, cartId int) (*entity.Cart, error) {
-	cart, err := u.cartRepository.GetCartByCartId(cartId)
-	if errors.Is(err, gorm.ErrRecordNotFound) {
-		return nil, errorlist.BadRequestError("cart not found", "NO_CART_FOUND")
-	}
-	if err != nil && !errors.Is(err, gorm.ErrRecordNotFound) {
-		return nil, errorlist.InternalServerError()
-	}
-
-	user, err := u.userRepository.GetUserByEmailOrUsername(username)
-	if err != nil {
-		return nil, errorlist.InternalServerError()
-	}
-
-	err = validateCartOwnership(cart, user)
-	if err != nil {
-		return nil, err
-	}
-
-	return cart, nil
 }
 
 func (u *cartUsecaseImpl) AddCart(username string, c *entity.CartReqBody) (*entity.CartResBody, error) {
@@ -165,10 +142,7 @@ func (u *cartUsecaseImpl) DeleteCartByCartId(username string, cartId int) (error
 	}
 
 	err = u.cartRepository.DeleteCartByCartId(cartId)
-	if errors.Is(err, gorm.ErrRecordNotFound) {
-		return errorlist.BadRequestError("cart item not found", "NO_CART_FOUND")
-	}
-	if err != nil && !errors.Is(err, gorm.ErrRecordNotFound) {
+	if err != nil {
 		return errorlist.InternalServerError()
 	}
 	

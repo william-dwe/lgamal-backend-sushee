@@ -44,19 +44,27 @@ func CreateRouter(c RouterConfig) *gin.Engine {
 	user.GET("/users/coupons", h.GetUserCouponByUsername)
 
 	user.GET("/carts", h.ShowCart)
-	user.GET("/carts/:cartId", h.ShowCartById)
 	user.POST("/carts", h.AddCart)
 	user.POST("/carts/:cartId", h.UpdateCartById)
 	user.DELETE("/carts", h.DeleteCart)
 	user.DELETE("/carts/:cartId", h.DeleteCartById)
 
-	user.GET("/orders", h.GetOrder)
+	user.GET("/orders", h.GetOrders)
 	user.POST("/orders", h.AddOrder)
 	user.GET("/orders/payment", h.GetPaymentOption)
 	user.POST("/orders/reviews", h.AddReview)
 
 	admin := v1.Group("")
 	admin.Use(h.AdminAuthorization)
+
+	admin.POST("/menus", h.AddMenu)
+	admin.POST("/menus/:menuId", h.UpdateMenu)
+	admin.DELETE("/menus/:menuId", h.DeleteMenu)
+	admin.GET("/menus/:menuId", h.GetMenuDetail)
+	
+	admin.GET("/orders/status", h.GetOrderStatus)
+	admin.POST("/orders/status", h.UpdateOrderStatus)
+
 	admin.POST("/coupons", h.AddCoupon)
 	admin.GET("/coupons", h.GetCoupon)
 	admin.POST("/coupons/:couponId", h.UpdateCoupon)

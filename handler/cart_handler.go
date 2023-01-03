@@ -43,23 +43,6 @@ func (h *Handler) ShowCart(c *gin.Context) {
 	router_helper.GenerateResponseMessage(c, resBody)
 }
 
-func (h *Handler) ShowCartById(c *gin.Context) {
-	username := c.GetString("username")
-	cartId, err := strconv.Atoi(c.Param("cartId"))
-	if err != nil {
-		router_helper.GenerateErrorMessage(c, errorlist.BadRequestError("wrong cartId format", "INVALID_INPUT"))
-		return
-	}
-
-	t, err := h.cartUsecase.GetCartByCartId(username, cartId)
-	if err != nil {
-		router_helper.GenerateErrorMessage(c, err)
-		return
-	}
-
-	router_helper.GenerateResponseMessage(c, t)
-}
-
 func (h *Handler) DeleteCart(c *gin.Context) {
 	username := c.GetString("username")
 

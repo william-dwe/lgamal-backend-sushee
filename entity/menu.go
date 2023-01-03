@@ -13,8 +13,17 @@ type Menu struct {
 	UpdatedAt time.Time `json:"updated_at"`
 	DeletedAt gorm.DeletedAt `json:"deleted_at"`
 	MenuName string `json:"menu_name"`
-	AvgRating int `json:"avg_rating"`
+	AvgRating float64 `json:"avg_rating"`
 	NumberOfFavorites int `json:"number_of_favorites"`
+	Price float64 `json:"price"`
+	MenuPhoto string `json:"menu_photo"`
+	CategoryId int `json:"category_id"`
+	Customization pgtype.JSON `json:"customization"`
+	Reviews []Review `json:"reviews"`
+}
+
+type MenuAddReqBody struct {
+	MenuName string `json:"menu_name"`
 	Price float64 `json:"price"`
 	MenuPhoto string `json:"menu_photo"`
 	CategoryId int `json:"category_id"`

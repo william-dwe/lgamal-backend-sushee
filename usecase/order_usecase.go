@@ -4,13 +4,16 @@ import (
 	"final-project-backend/entity"
 	"final-project-backend/errorlist"
 	"final-project-backend/repository"
+	"fmt"
 	"time"
 )
 
 type OrderUsecase interface {
 	GetPaymentOption() (*[]entity.PaymentOption, error)
 	AddOrder(username string, reqBody *entity.OrderReqBody) (*entity.Order, error)
-	GetOrderHistory(username string, oq *entity.OrderQuery) (*[]entity.Order, error)
+	GetOrderStatus(oq *entity.OrderStatusQuery) (*[]entity.Order, error)
+	UpdateOrderStatus(reqBody *entity.OrderStatusUpdateReqBody) (*entity.Order, error)
+	GetOrderHistory(username string, oq *entity.OrderHistoryQuery) (*[]entity.Order, error)
 	AddReview(username string, r *entity.ReviewAddReqBody) (*entity.Review, error)
 }
 
@@ -86,14 +89,16 @@ func (u *orderUsecaseImpl) AddOrder(username string, reqBody *entity.OrderReqBod
 		UserId: int(user.ID),
 		OrderDate: time.Now(),
 		PaymentOptionId: reqBody.PaymentOptionId,
+		Status: "Payment",
 	}
 
+	var couponId int
 	if reqBody.CouponCode != "" {
 		coupon, err := u.couponRepository.GetUserCouponByCouponCode(int(user.ID), reqBody.CouponCode)
 		if err != nil {
 			return nil, errorlist.InternalServerError()
 		}
-		couponId := int(coupon.ID) 
+		couponId = int(coupon.ID) 
 		newOrder.CouponId = &couponId
 		newOrder.DiscountAmount = coupon.DiscountAmount
 	}
@@ -106,7 +111,6 @@ func (u *orderUsecaseImpl) AddOrder(username string, reqBody *entity.OrderReqBod
 	newOrder.NetAmount = newOrder.GrossAmount-newOrder.DiscountAmount
 
 	order, err := u.orderRepository.AddOrder(&newOrder)
-
 	if err != nil {
 		return nil, errorlist.InternalServerError()
 	}
@@ -139,29 +143,54 @@ func (u *orderUsecaseImpl) AddOrder(username string, reqBody *entity.OrderReqBod
 		IsOrdered: true,
 	})
 
-	for _, id := range reqBody.CartIdList {
-		u.cartRepository.DeleteCartByCartId(id)
+	if reqBody.CouponCode != "" {
+		u.couponRepository.DeleteCouponById(*newOrder.CouponId)
 	}
 
-	// todo: set delivery status
-	// plan: Payment --> Prepared --> Sending --> Received
+	return order, nil
+}
+
+func (u *orderUsecaseImpl) GetOrderStatus(oq *entity.OrderStatusQuery) (*[]entity.Order, error) {
+	orders, err := u.orderRepository.GetOrderStatus(*oq)
+	if err != nil {
+		return nil, errorlist.InternalServerError()
+	}
+
+	return orders, nil
+}
+
+func (u *orderUsecaseImpl) UpdateOrderStatus(reqBody *entity.OrderStatusUpdateReqBody) (*entity.Order, error) {
+	orderWithNewStatus := entity.Order{
+		Status: reqBody.Status,
+	}
+	
+	err := u.orderRepository.UpdateOrderByOrderId(reqBody.OrderId, &orderWithNewStatus)
+	if err != nil {
+		return nil, errorlist.InternalServerError()
+	}
+
+	order, err := u.orderRepository.GetOrderById(reqBody.OrderId)
+	if err != nil {
+		return nil, errorlist.InternalServerError()
+	}
 
 	return order, nil
 }
 
 
-func (u *orderUsecaseImpl) GetOrderHistory(username string, oq *entity.OrderQuery) (*[]entity.Order, error) {
+
+func (u *orderUsecaseImpl) GetOrderHistory(username string, oq *entity.OrderHistoryQuery) (*[]entity.Order, error) {
 	user, err := u.userRepository.GetUserByEmailOrUsername(username)
 	if err != nil {
 		return nil, errorlist.InternalServerError()
 	}
 	
-	order, err := u.orderRepository.GetOrderHistory(int(user.ID), *oq)
+	orders, err := u.orderRepository.GetOrderHistory(int(user.ID), *oq)
 	if err != nil {
 		return nil, errorlist.InternalServerError()
 	}
 
-	return order, nil
+	return orders, nil
 }
 
 func (u *orderUsecaseImpl) AddReview(username string, r *entity.ReviewAddReqBody) (*entity.Review, error) {
@@ -194,6 +223,12 @@ func (u *orderUsecaseImpl) AddReview(username string, r *entity.ReviewAddReqBody
 	if err != nil {
 		return nil, errorlist.InternalServerError()
 	}
-	
+
+	err = u.orderRepository.UpdateAvgReviewScoreByMenuId(newReview.MenuId)
+	if err != nil {
+		fmt.Println("ERR:", err)
+		return nil, errorlist.InternalServerError()
+	}
+
 	return review, nil
 }

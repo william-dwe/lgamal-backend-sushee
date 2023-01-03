@@ -12,6 +12,10 @@ import (
 type MenuUsecase interface {
 	GetMenu(entity.MenuQuery) (*[]entity.Menu, int, error)
 	GetPromotion() (*[]entity.Promotion, error)
+	AddMenu(reqBody *entity.MenuAddReqBody) (*entity.Menu, error)
+	UpdateMenuByMenuId(menuId int, m *entity.Menu) (*entity.Menu, error)
+	DeleteMenuByMenuId(menuId int) (error)
+	GetMenuDetailByMenuId(menuId int) (*entity.Menu, error)
 }
 
 type menuUsecaseImpl struct {
@@ -27,7 +31,6 @@ func NewMenuUsecase(c MenuUsecaseConfig) MenuUsecase {
 		menuRepository:   c.MenuRepository,
 	}
 }
-
 
 func (u *menuUsecaseImpl) GetMenu(q entity.MenuQuery) (*[]entity.Menu, int, error) {
 	rows, err := u.menuRepository.GetMenuCount(q)
@@ -61,4 +64,53 @@ func (u *menuUsecaseImpl) GetPromotion() (*[]entity.Promotion, error) {
 	}
 	
 	return menus, nil
+}
+
+func (u *menuUsecaseImpl) AddMenu(reqBody *entity.MenuAddReqBody) (*entity.Menu, error) {
+	newMenu := entity.Menu{
+		MenuName: reqBody.MenuName,
+		Price: reqBody.Price,
+		MenuPhoto: reqBody.MenuPhoto,
+		CategoryId: reqBody.CategoryId,
+		Customization: guardNullJSON(reqBody.Customization),
+	}
+
+	menu, err := u.menuRepository.AddMenu(&newMenu)
+	if err != nil {
+		return nil, errorlist.InternalServerError()
+	}
+	
+	return menu, nil
+}
+
+func (u *menuUsecaseImpl) UpdateMenuByMenuId(menuId int, m *entity.Menu) (*entity.Menu, error) {
+	err := u.menuRepository.UpdateMenuByMenuId(menuId, m)
+	if err != nil {
+		return nil, errorlist.InternalServerError()
+	}
+
+	menu, err := u.menuRepository.GetMenuByMenuId(menuId)
+	if err != nil {
+		return nil, errorlist.InternalServerError()
+	}
+	
+	return menu, nil
+}
+
+func (u *menuUsecaseImpl) DeleteMenuByMenuId(menuId int) (error) {
+	err := u.menuRepository.DeleteMenuByMenuId(menuId)
+	if err != nil {
+		return errorlist.InternalServerError()
+	}
+
+	return nil
+}
+
+func (u *menuUsecaseImpl) GetMenuDetailByMenuId(menuId int) (*entity.Menu, error) {
+	menu, err := u.menuRepository.GetMenuDetailByMenuId(menuId)
+	if err != nil {
+		return nil, errorlist.InternalServerError()
+	}
+
+	return menu, nil
 }

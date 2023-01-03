@@ -33,7 +33,12 @@ func (h *Handler) GetCoupon(c *gin.Context) {
 		router_helper.GenerateErrorMessage(c, err)
 		return
 	}
-	router_helper.GenerateResponseMessage(c, coupons)
+
+	result := entity.CouponResBody{
+		Coupons: *coupons,
+	}
+
+	router_helper.GenerateResponseMessage(c, result)
 }
 
 func (h *Handler) UpdateCoupon(c *gin.Context) {
@@ -89,13 +94,6 @@ func (h *Handler) AddUserCoupon(c *gin.Context) {
 
 	router_helper.GenerateResponseMessage(c, userCoupon)
 
-	// what's next?
-	// 1. test to integrate coupon with order [done]
-	// 2. create coupon component at profile & cart [done]
-	// 3. trx history + review [done]
-	// 4. favorited menu
-	// CRUD TIME ADMIN!!!!
-	// UT
 }
 
 
@@ -108,6 +106,11 @@ func (h *Handler) GetUserCouponByUsername(c *gin.Context) {
 		router_helper.GenerateErrorMessage(c, err)
 		return
 	}
-	router_helper.GenerateResponseMessage(c, coupons)
+
+	result := entity.UserCouponResBody{
+		UserCoupons: *coupons,
+	}
+
+	router_helper.GenerateResponseMessage(c, result)
 }
 

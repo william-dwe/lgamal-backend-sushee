@@ -20,15 +20,34 @@ type Order struct {
 	GrossAmount float64 `json:"gross_amount"` 
 	DiscountAmount float64 `json:"discount_amount"`
 	NetAmount float64 `json:"net_amount"`
+	Status string `json:"status"`
 }
 
-type OrderQuery struct {
+type OrderHistoryQuery struct {
 	Search string
 	SortBy string
 	FilterByCategory string
 	Sort   string
 	Limit  int
 	Page   int
+}
+
+type OrderHistoryResBody struct {
+	Orders []Order `json:"orders"`
+}
+
+type OrderStatusQuery struct {
+	Search string
+	SortBy string
+	FilterByStatus string
+	Sort   string
+	Limit  int
+	Page   int
+}
+
+type OrderStatusUpdateReqBody struct {
+	OrderId int `json:"order_id"`
+	Status string `json:"status"`
 }
 
 type OrderedMenu struct {
@@ -49,6 +68,10 @@ type OrderReqBody struct {
 	CartIdList []int `json:"cart_id_list"`
 	PaymentOptionId int `json:"payment_option_id"`
 	CouponCode string `json:"coupon_code,omitempty"`
+}
+
+type OrdersResBody struct {
+	Orders []Order `json:"orders"`
 }
 
 type DeliveryOrder struct {

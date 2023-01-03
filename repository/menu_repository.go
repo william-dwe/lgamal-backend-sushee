@@ -14,6 +14,11 @@ type MenuRepository interface {
 	GetMenuCount(q entity.MenuQuery) (int, error)
 	GetPromotionMenu() (*[]entity.Promotion, error)
 	GetAndValidatePromoMenu(menuId, promoId int) (*entity.PromoMenu, error)
+	AddMenu(newMenu *entity.Menu) (*entity.Menu, error)
+	GetMenuByMenuId(menuId int) (*entity.Menu, error)
+	UpdateMenuByMenuId(menuId int, newMenu *entity.Menu) (error)
+	DeleteMenuByMenuId(menuId int) (error)
+	GetMenuDetailByMenuId(menuId int) (*entity.Menu, error)
 }
 
 type MenuRepositoryImpl struct {
@@ -92,4 +97,49 @@ func (r *MenuRepositoryImpl) GetAndValidatePromoMenu(menuId, promoId int) (*enti
 		Find(&c).
 		Error
 	return &c, err
+}
+
+func (r *MenuRepositoryImpl) AddMenu(newMenu *entity.Menu) (*entity.Menu, error) {
+	err := r.db.
+		Create(newMenu).
+		Error
+	return newMenu, err
+}
+
+func (r *MenuRepositoryImpl) GetMenuByMenuId(menuId int) (*entity.Menu, error) {
+	var menu entity.Menu
+
+	err := r.db.
+		Where("id = ?", menuId).
+		First(&menu).Error
+	return &menu, err
+}
+
+func (r *MenuRepositoryImpl) UpdateMenuByMenuId(menuId int, newMenu *entity.Menu) (error) {
+	err := r.db.
+		Where("id = ?", menuId).
+		Updates(newMenu).
+		Error
+	return err
+}
+
+func (r *MenuRepositoryImpl) DeleteMenuByMenuId(menuId int) (error) {
+	var menu entity.Menu
+
+	query := r.db.
+		Where("id = (?)", menuId).
+		Delete(&menu)
+
+	err := query.Error
+	return err
+}
+
+func (r *MenuRepositoryImpl) GetMenuDetailByMenuId(menuId int) (*entity.Menu, error) {
+	var m entity.Menu
+
+	q := r.db.
+		Preload("Reviews").
+		Where("id in (?)", menuId).
+		Find(&m)
+	return &m, q.Error
 }

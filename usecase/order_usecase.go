@@ -1,19 +1,17 @@
 package usecase
 
 import (
-	"errors"
 	"final-project-backend/entity"
 	"final-project-backend/errorlist"
 	"final-project-backend/repository"
 	"time"
-
-	"gorm.io/gorm"
 )
 
 type OrderUsecase interface {
 	GetPaymentOption() (*[]entity.PaymentOption, error)
 	AddOrder(username string, reqBody *entity.OrderReqBody) (*entity.Order, error)
-	GetOrderHistory(username string) (*[]entity.Order, error)
+	GetOrderHistory(username string, oq *entity.OrderQuery) (*[]entity.Order, error)
+	AddReview(username string, r *entity.ReviewAddReqBody) (*entity.Review, error)
 }
 
 type orderUsecaseImpl struct {
@@ -91,10 +89,7 @@ func (u *orderUsecaseImpl) AddOrder(username string, reqBody *entity.OrderReqBod
 	}
 
 	if reqBody.CouponCode != "" {
-		coupon, r, err := u.couponRepository.GetUserCouponByCouponCode(int(user.ID), reqBody.CouponCode)
-		if errors.Is(err, gorm.ErrRecordNotFound) || r == 0{
-			return nil, errorlist.BadRequestError("coupon code invalid", "INVALID_COUPON_CODE")
-		}
+		coupon, err := u.couponRepository.GetUserCouponByCouponCode(int(user.ID), reqBody.CouponCode)
 		if err != nil {
 			return nil, errorlist.InternalServerError()
 		}
@@ -148,32 +143,57 @@ func (u *orderUsecaseImpl) AddOrder(username string, reqBody *entity.OrderReqBod
 		u.cartRepository.DeleteCartByCartId(id)
 	}
 
-
-	
-
-	// todo: delivery
+	// todo: set delivery status
+	// plan: Payment --> Prepared --> Sending --> Received
 
 	return order, nil
 }
 
 
-func (u *orderUsecaseImpl) GetOrderHistory(username string) (*[]entity.Order, error) {
+func (u *orderUsecaseImpl) GetOrderHistory(username string, oq *entity.OrderQuery) (*[]entity.Order, error) {
+	user, err := u.userRepository.GetUserByEmailOrUsername(username)
+	if err != nil {
+		return nil, errorlist.InternalServerError()
+	}
+	
+	order, err := u.orderRepository.GetOrderHistory(int(user.ID), *oq)
+	if err != nil {
+		return nil, errorlist.InternalServerError()
+	}
+
+	return order, nil
+}
+
+func (u *orderUsecaseImpl) AddReview(username string, r *entity.ReviewAddReqBody) (*entity.Review, error) {
 	user, err := u.userRepository.GetUserByEmailOrUsername(username)
 	if err != nil {
 		return nil, errorlist.InternalServerError()
 	}
 
-	order, err := u.orderRepository.GetOrderHistory(int(user.ID))
+	orderedMenu, err :=  u.orderRepository.GetOrderedMenuById(r.OrderedMenuId)
 	if err != nil {
 		return nil, errorlist.InternalServerError()
 	}
 
-	return order, nil
-}
+	order, err := u.orderRepository.GetOrderById(orderedMenu.OrderId)
+	if err != nil {
+		return nil, errorlist.InternalServerError()
+	}
+	if order.UserId != int(user.ID) {
+		return nil, errorlist.UnauthorizedError()
+	}
 
-// todo: set delivery status
-// plan: Prepared --> Sending --> Received
-// Details:
-// P -> default val
-// S -> admin confirmed
-// S -> admin confirmed
+	newReview := entity.Review {
+		ReviewDescription: r.ReviewDescription,
+		Rating: r.Rating,
+		OrderedMenuId: r.OrderedMenuId,
+		MenuId: *orderedMenu.MenuId,
+	}
+
+	review, err := u.orderRepository.AddReview(&newReview)
+	if err != nil {
+		return nil, errorlist.InternalServerError()
+	}
+	
+	return review, nil
+}

@@ -2,15 +2,20 @@ package repository
 
 import (
 	"final-project-backend/entity"
+	"strings"
 
 	"gorm.io/gorm"
+	"gorm.io/gorm/clause"
 )
 
 type OrderRepository interface {
 	GetPaymentOption() (*[]entity.PaymentOption, error)
 	AddOrder(newOrder *entity.Order) (*entity.Order, error)
 	AddOrderedMenu(newOrderedMenus *[]entity.OrderedMenu) (*[]entity.OrderedMenu, error)
-	GetOrderHistory(userId int) (*[]entity.Order, error)
+	GetOrderHistory(userId int, oq entity.OrderQuery) (*[]entity.Order, error)
+	GetOrderById(orderId int) (*entity.Order, error)
+	GetOrderedMenuById(orderedMenuId int) (*entity.OrderedMenu, error)
+	AddReview(review *entity.Review) (*entity.Review, error)
 }
 
 type OrderRepositoryImpl struct {
@@ -51,11 +56,62 @@ func (r *OrderRepositoryImpl) AddOrderedMenu(newOrderedMenus *[]entity.OrderedMe
 	return newOrderedMenus, err
 }
 
-func (r *OrderRepositoryImpl) GetOrderHistory(userId int) (*[]entity.Order, error) {
+func (r *OrderRepositoryImpl) GetOrderHistory(userId int, oq entity.OrderQuery) (*[]entity.Order, error) {
 	var o []entity.Order
+
+	sqSelectedMenuOrder := r.db.
+		Table("orders o").
+		Select("user_id, order_id, menu_id").
+		Joins("join ordered_menus om ON o.id = om.order_id").
+		Where("user_id in (?)", userId)
+
+	sqSelectedMenu := r.db.
+		Table("menus m").
+		Select("order_id").
+		Joins("join (?) sm  ON sm.menu_id = m.id", sqSelectedMenuOrder).
+		Where("menu_name ilike (?)", "%"+oq.Search+"%")
+		
 	q := r.db.
 		Preload("OrderedMenus").
-		Where("user_id in (?)", userId).
+		Preload("OrderedMenus.Menu").
+		Preload("OrderedMenus.Review").
+		Where("id in (?)", sqSelectedMenu).
+		Order(clause.OrderByColumn{
+			Column: clause.Column{
+				Name: oq.SortBy,
+			},
+			Desc: strings.ToLower(oq.Sort) == "desc",
+		}).
+		Limit(oq.Limit).
+		Offset(oq.Page*oq.Limit - oq.Limit).
 		Find(&o)
 	return &o, q.Error
+}
+
+
+func (r *OrderRepositoryImpl) GetOrderById(orderId int) (*entity.Order, error) {
+	var o entity.Order
+
+	err := r.db.
+	Where("id = (?)", orderId).
+	First(&o).
+	Error
+	return &o, err
+}
+
+func (r *OrderRepositoryImpl) GetOrderedMenuById(orderedMenuId int) (*entity.OrderedMenu, error) {
+	var o entity.OrderedMenu
+
+	err := r.db.
+	Where("id = (?)", orderedMenuId).
+	First(&o).
+	Error
+	return &o, err
+}
+
+func (r *OrderRepositoryImpl) AddReview(review *entity.Review) (*entity.Review, error) {
+	err := r.db.
+	Create(review).
+	Error
+return review, err
 }

@@ -81,25 +81,21 @@ func (h *Handler) AddUserCoupon(c *gin.Context) {
 		return
 	}
 
-	
+	userCoupon, err := h.couponUsecase.AddUserCoupon(reqBody.UserId, reqBody.CouponId)
+	if err != nil {
+		router_helper.GenerateErrorMessage(c, err)
+		return
+	}
 
-	// todo: input userid & couponid; body json?
-	// logic: check coupon avial -> create usercoupon -> deduct coupon slot
+	router_helper.GenerateResponseMessage(c, userCoupon)
 
 	// what's next?
-	// 1. test to integrate coupon with order
-	// 2. create coupon component at profile & cart
-	// 3. trx history + review
+	// 1. test to integrate coupon with order [done]
+	// 2. create coupon component at profile & cart [done]
+	// 3. trx history + review [done]
 	// 4. favorited menu
 	// CRUD TIME ADMIN!!!!
 	// UT
-
-	// coupons, err := h.couponUsecase.GetUserCouponByUsername(username)
-	// if err != nil {
-	// 	router_helper.GenerateErrorMessage(c, err)
-	// 	return
-	// }
-	// router_helper.GenerateResponseMessage(c, coupons)
 }
 
 

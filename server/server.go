@@ -43,6 +43,7 @@ func initRouter() *gin.Engine {
 		OrderRepository:   orderRepo,
 		UserRepository: userRepo,
 		CartRepository: cartRepo,
+		CouponRepository: couponRepo,
 	})
 	couponUsecase := usecase.NewCouponUsecase(usecase.CouponUsecaseConfig{
 		CouponRepository: couponRepo,

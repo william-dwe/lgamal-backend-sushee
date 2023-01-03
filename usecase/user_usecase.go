@@ -137,6 +137,7 @@ func (u *userUsecaseImpl) Login(identifier, password string) (*entity.UserLoginR
 
 	token := entity.UserLoginResBody{
 		AccessToken: accessTokenStr,
+		RoleName: role.RoleName,
 	}
 	return &token, refreshTokenStr, err
 }
@@ -175,6 +176,7 @@ func (u *userUsecaseImpl) Refresh(refreshToken string) (*entity.UserLoginResBody
 	}
 	accessToken := entity.UserLoginResBody{
 		AccessToken: accessTokenStr,
+		RoleName: role.RoleName,
 	}
 	return &accessToken, err
 }

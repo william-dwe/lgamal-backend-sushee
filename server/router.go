@@ -41,6 +41,7 @@ func CreateRouter(c RouterConfig) *gin.Engine {
 	user.Use(h.UserAuthorization)
 	user.GET("/users/me", h.ShowUserDetail)
 	user.POST("/users/me", h.UpdateUserProfile)
+	user.GET("/users/coupons", h.GetUserCouponByUsername)
 
 	user.GET("/carts", h.ShowCart)
 	user.GET("/carts/:cartId", h.ShowCartById)
@@ -52,7 +53,7 @@ func CreateRouter(c RouterConfig) *gin.Engine {
 	user.GET("/orders", h.GetOrder)
 	user.POST("/orders", h.AddOrder)
 	user.GET("/orders/payment", h.GetPaymentOption)
-	user.GET("/orders/coupon", h.GetUserCouponByUsername)
+	user.POST("/orders/reviews", h.AddReview)
 
 	admin := v1.Group("")
 	admin.Use(h.AdminAuthorization)
@@ -60,6 +61,7 @@ func CreateRouter(c RouterConfig) *gin.Engine {
 	admin.GET("/coupons", h.GetCoupon)
 	admin.POST("/coupons/:couponId", h.UpdateCoupon)
 	admin.DELETE("/coupons/:couponId", h.DeleteCoupon)
+	admin.POST("/users/coupons", h.AddUserCoupon)
 
 	r.NoRoute(h.NotFoundHandler)
 	return r

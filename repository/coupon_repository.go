@@ -2,6 +2,7 @@ package repository
 
 import (
 	"final-project-backend/entity"
+	"fmt"
 
 	"gorm.io/gorm"
 )
@@ -12,8 +13,9 @@ type CouponRepository interface {
 	GetCouponById(couponId int) (*entity.Coupon, error)
 	UpdateCouponById(couponId int, newCoupon *entity.Coupon) (error)
 	DeleteCouponById(couponId int) (*entity.Coupon, error)
+	AddUserCoupon(userCoupon *entity.UserCoupon) (*entity.UserCoupon, error)
 	GetUserCouponByUsername(username string) (*[]entity.UserCoupon, int, error)
-	GetUserCouponByCouponCode(userId int, couponCode string) (*entity.UserCoupon, int, error)
+	GetUserCouponByCouponCode(userId int, couponCode string) (*entity.UserCoupon, error)
 }
 
 type CouponRepositoryImpl struct {
@@ -68,6 +70,13 @@ func (r *CouponRepositoryImpl) DeleteCouponById(couponId int) (*entity.Coupon, e
 	return &coupon, err
 }
 
+func (r *CouponRepositoryImpl) AddUserCoupon(userCoupon *entity.UserCoupon) (*entity.UserCoupon, error) {
+	err := r.db.
+		Create(&userCoupon).
+		Error
+	return userCoupon, err
+}
+
 func (r *CouponRepositoryImpl) GetUserCouponByUsername(username string) (*[]entity.UserCoupon, int, error) {
 	var coupon []entity.UserCoupon
 	userSQ := r.db.
@@ -80,10 +89,12 @@ func (r *CouponRepositoryImpl) GetUserCouponByUsername(username string) (*[]enti
 	return &coupon, int(q.RowsAffected), q.Error
 }
 
-func (r *CouponRepositoryImpl) GetUserCouponByCouponCode(userId int, couponCode string) (*entity.UserCoupon, int, error) {
+func (r *CouponRepositoryImpl) GetUserCouponByCouponCode(userId int, couponCode string) (*entity.UserCoupon, error) {
 	var coupon entity.UserCoupon
+	fmt.Println("DEBUG - userid", userId)
+	fmt.Println("DEBUG - coupon", couponCode)
 	q := r.db.
 		Where("user_id in (?) AND coupon_code = (?)", userId, couponCode).
 		First(&coupon)
-	return &coupon, int(q.RowsAffected), q.Error
+	return &coupon, q.Error
 }

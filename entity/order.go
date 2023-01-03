@@ -22,6 +22,15 @@ type Order struct {
 	NetAmount float64 `json:"net_amount"`
 }
 
+type OrderQuery struct {
+	Search string
+	SortBy string
+	FilterByCategory string
+	Sort   string
+	Limit  int
+	Page   int
+}
+
 type OrderedMenu struct {
 	ID uint `json:"id"`
 	CreatedAt time.Time `json:"created_at"`
@@ -29,9 +38,11 @@ type OrderedMenu struct {
 	DeletedAt gorm.DeletedAt `json:"deleted_at"`
 	OrderId int `json:"order_id"`
 	MenuId *int `json:"menu_id"`
+	Menu Menu `json:"menu"`
 	PromotionId *int `json:"promotion_id"`
 	Quantity int `json:"quantity"`
 	MenuOption pgtype.JSON `json:"menu_option"`
+	Review Review `json:"review"`
 }
 
 type OrderReqBody struct {

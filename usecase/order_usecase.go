@@ -164,12 +164,12 @@ func (u *orderUsecaseImpl) UpdateOrderStatus(reqBody *entity.OrderStatusUpdateRe
 		Status: reqBody.Status,
 	}
 	
-	err := u.orderRepository.UpdateOrderByOrderId(reqBody.OrderId, &orderWithNewStatus)
+	err := u.orderRepository.UpdateOrderByOrderId(reqBody.ID, &orderWithNewStatus)
 	if err != nil {
 		return nil, errorlist.InternalServerError()
 	}
 
-	order, err := u.orderRepository.GetOrderById(reqBody.OrderId)
+	order, err := u.orderRepository.GetOrderById(reqBody.ID)
 	if err != nil {
 		return nil, errorlist.InternalServerError()
 	}

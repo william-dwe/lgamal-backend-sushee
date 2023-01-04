@@ -46,7 +46,7 @@ type OrderStatusQuery struct {
 }
 
 type OrderStatusUpdateReqBody struct {
-	OrderId int `json:"order_id"`
+	ID int `json:"id"`
 	Status string `json:"status"`
 }
 

@@ -59,11 +59,15 @@ CREATE TABLE IF NOT EXISTS menus (
 	menu_photo varchar,
 	category_id INT,
 	foreign key (category_id) references categories(id),
-	customization json set default '{}',
+	customization json,
 	created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
 	updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
 	deleted_at TIMESTAMP NULL
 );
+
+alter table menus 
+alter column customization
+set default '{}';
 
 CREATE TABLE IF NOT EXISTS favorited_menus (
 	id SERIAL PRIMARY KEY,
@@ -138,7 +142,7 @@ create table if not exists coupons (
 	created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
 	updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
 	deleted_at TIMESTAMP NULL
-)
+);
 
 create table if not exists user_coupons (
 	id SERIAL primary key, 

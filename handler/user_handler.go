@@ -4,6 +4,7 @@ import (
 	"final-project-backend/config"
 	"final-project-backend/errorlist"
 	"final-project-backend/utils"
+	"net/http"
 	"strconv"
 
 	"final-project-backend/entity"
@@ -44,6 +45,7 @@ func (h *Handler) Login(c *gin.Context) {
 	}
 
 	expirationLimit, _ := strconv.Atoi(config.Config.AuthConfig.TimeLimitRefreshToken)
+	c.SetSameSite(http.SameSiteNoneMode)
 	c.SetCookie(
 		"refreshToken",
 		refreshToken,

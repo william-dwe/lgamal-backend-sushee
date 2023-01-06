@@ -52,7 +52,7 @@ func (h *Handler) Login(c *gin.Context) {
 		expirationLimit,
 		"/",
 		"",
-		false,
+		true,
 		true,
 	)
 

@@ -49,7 +49,7 @@ func (h *Handler) Login(c *gin.Context) {
 		refreshToken,
 		expirationLimit,
 		"/",
-		"localhost",
+		"",
 		false,
 		true,
 	)

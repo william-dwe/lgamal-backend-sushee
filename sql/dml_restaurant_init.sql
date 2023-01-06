@@ -19,17 +19,28 @@ insert into categories (id, category_name) values (1, 'appetizers'), (2, 'meals'
 
 insert into menus (menu_name, avg_rating, number_of_favorites, price, menu_photo, category_id)
 values 
-('Nori', 0, 0, 10000, 'https://res.cloudinary.com/dgr6o89ym/image/upload/v1671772130/menu/appetizer-nori_rdfbss.png', 1),
-('Edamame', 0, 0, 11000, 'https://res.cloudinary.com/dgr6o89ym/image/upload/v1671771968/menu/appetizer-edamame_d0slsa.png', 1),
-('Spring Roll', 0, 0, 12000, 'https://res.cloudinary.com/dgr6o89ym/image/upload/v1671771968/menu/appetizer-spring_roll_m1wmfy.png', 1),
-('Salmon Maki', 0, 0, 13000, 'https://res.cloudinary.com/dgr6o89ym/image/upload/v1671771968/menu/meals-salmon_maki_dqhlg9.png', 2),
-('California Roll', 0, 0, 14000, 'https://res.cloudinary.com/dgr6o89ym/image/upload/v1671771968/menu/meals-california_roll_y0r8ca.png', 2),
-('Salmon Sashimi', 0, 0, 15000, 'https://res.cloudinary.com/dgr6o89ym/image/upload/v1671771969/menu/meals-salmon_sashimi_er9fdd.png', 2),
-('Salmon Nigiri', 0, 0, 13000, 'https://res.cloudinary.com/dgr6o89ym/image/upload/v1671771969/menu/meals-salmon_nigiri_nml4nk.png', 2),
-('Sushi Platter', 0, 0, 40000, 'https://res.cloudinary.com/dgr6o89ym/image/upload/v1671771969/menu/meals-sushi_plater_vvwyhe.png', 2),
-('Lemon Tea', 0, 0, 12000, 'https://res.cloudinary.com/dgr6o89ym/image/upload/v1671771968/menu/drinks-lemon_tea_owmrxz.png', 3),
-('Mint Tea', 0, 0, 12000, 'https://res.cloudinary.com/dgr6o89ym/image/upload/v1671771967/menu/drinks-mint_tea_mgwedf.png', 3);
+('Nori', 0, 0, 10000, 'https://res.cloudinary.com/dgr6o89ym/image/upload/h_500,w_500/v1671772130/menu/appetizer-nori_rdfbss.png', 1),
+('Edamame', 0, 0, 11000, 'https://res.cloudinary.com/dgr6o89ym/image/upload/h_500,w_500/v1671771968/menu/appetizer-edamame_d0slsa.png', 1),
+('Spring Roll', 0, 0, 12000, 'https://res.cloudinary.com/dgr6o89ym/image/upload/h_500,w_500/v1671771968/menu/appetizer-spring_roll_m1wmfy.png', 1),
+('Salmon Maki', 0, 0, 13000, 'https://res.cloudinary.com/dgr6o89ym/image/upload/h_500,w_500/v1671771968/menu/meals-salmon_maki_dqhlg9.png', 2),
+('California Roll', 0, 0, 14000, 'https://res.cloudinary.com/dgr6o89ym/image/upload/h_500,w_500/v1671771968/menu/meals-california_roll_y0r8ca.png', 2),
+('Salmon Sashimi', 0, 0, 15000, 'https://res.cloudinary.com/dgr6o89ym/image/upload/h_500,w_500/v1671771969/menu/meals-salmon_sashimi_er9fdd.png', 2),
+('Salmon Nigiri', 0, 0, 13000, 'https://res.cloudinary.com/dgr6o89ym/image/upload/h_500,w_500/v1671771969/menu/meals-salmon_nigiri_nml4nk.png', 2),
+('Sushi Platter', 0, 0, 40000, 'https://res.cloudinary.com/dgr6o89ym/image/upload/h_500,w_500/v1671771969/menu/meals-sushi_plater_vvwyhe.png', 2),
+('Lemon Tea', 0, 0, 12000, 'https://res.cloudinary.com/dgr6o89ym/image/upload/h_500,w_500/v1671771968/menu/drinks-lemon_tea_owmrxz.png', 3),
+('Mint Tea', 0, 0, 12000, 'https://res.cloudinary.com/dgr6o89ym/image/upload/h_500,w_500/v1671771967/menu/drinks-mint_tea_mgwedf.png', 3);
 insert into favorited_menus (user_id, menu_id) values (1,1);
+
+update menus set menu_photo = 'https://res.cloudinary.com/dgr6o89ym/image/upload/h_500,w_500/v1671772130/menu/appetizer-nori_rdfbss.png' where menu_name = 'Nori';
+update menus set menu_photo = 'https://res.cloudinary.com/dgr6o89ym/image/upload/h_500,w_500/v1671771968/menu/appetizer-edamame_d0slsa.png' where menu_name = 'Edamame';
+update menus set menu_photo = 'https://res.cloudinary.com/dgr6o89ym/image/upload/h_500,w_500/v1671771968/menu/appetizer-spring_roll_m1wmfy.png' where menu_name = 'Spring Roll';
+update menus set menu_photo = 'https://res.cloudinary.com/dgr6o89ym/image/upload/h_500,w_500/v1671771968/menu/meals-salmon_maki_dqhlg9.png' where menu_name = 'Salmon Maki';
+update menus set menu_photo = 'https://res.cloudinary.com/dgr6o89ym/image/upload/h_500,w_500/v1671771968/menu/meals-california_roll_y0r8ca.png' where menu_name = 'California Roll';
+update menus set menu_photo = 'https://res.cloudinary.com/dgr6o89ym/image/upload/h_500,w_500/v1671771969/menu/meals-salmon_sashimi_er9fdd.png' where menu_name = 'Salmon Sashimi';
+update menus set menu_photo = 'https://res.cloudinary.com/dgr6o89ym/image/upload/h_500,w_500/v1671771969/menu/meals-salmon_nigiri_nml4nk.png' where menu_name = 'Salmon Nigiri';
+update menus set menu_photo = 'https://res.cloudinary.com/dgr6o89ym/image/upload/h_500,w_500/v1671771969/menu/meals-sushi_plater_vvwyhe.png' where menu_name = 'Sushi Platter';
+update menus set menu_photo = 'https://res.cloudinary.com/dgr6o89ym/image/upload/h_500,w_500/v1671771968/menu/drinks-lemon_tea_owmrxz.png' where menu_name = 'Lemon Tea';
+update menus set menu_photo = 'https://res.cloudinary.com/dgr6o89ym/image/upload/h_500,w_500/v1671771967/menu/drinks-mint_tea_mgwedf.png' where menu_name = 'Mint Tea';
 
 update menus
 set customization = '{"title":"Size","type":"radio","options":["Small","Medium","Large"]}'
